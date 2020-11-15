@@ -3,8 +3,7 @@ use bevy::prelude::*;
 /// This example shows various ways to configure texture materials in 3D
 fn main() {
     App::build()
-        .add_plugins(DefaultPlugins)
-        .add_plugin(bevy_webgl2::WebGL2Plugin::default())
+        .add_plugins(bevy_webgl2::DefaultPlugins)
         .add_startup_system(setup.system())
         .run();
 }

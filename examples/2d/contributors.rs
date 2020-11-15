@@ -1,15 +1,10 @@
 use bevy::prelude::*;
 use rand::{prelude::SliceRandom, Rng};
-use std::{
-    collections::BTreeSet,
-    io::{BufRead, BufReader},
-    process::Stdio,
-};
+use std::collections::BTreeSet;
 
 fn main() {
     App::build()
-        .add_plugins(DefaultPlugins)
-        .add_plugin(bevy_webgl2::WebGL2Plugin::default())
+        .add_plugins(bevy_webgl2::DefaultPlugins)
         .add_startup_system(setup.system())
         .add_system(velocity_system.system())
         .add_system(move_system.system())

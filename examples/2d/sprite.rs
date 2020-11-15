@@ -2,8 +2,7 @@ use bevy::prelude::*;
 
 fn main() {
     App::build()
-        .add_plugins(DefaultPlugins)
-        .add_plugin(bevy_webgl2::WebGL2Plugin::default())
+        .add_plugins(bevy_webgl2::DefaultPlugins)
         .add_startup_system(setup.system())
         .run();
 }
