@@ -31,7 +31,7 @@ pub struct WebGL2RenderResourceContext {
 unsafe impl Send for WebGL2RenderResourceContext {}
 unsafe impl Sync for WebGL2RenderResourceContext {}
 
-pub const BIND_BUFFER_ALIGNMENT: usize = 32;
+pub const BIND_BUFFER_ALIGNMENT: usize = 256;
 pub const STORAGE_BUFFER_SIZE: usize = 65536;
 
 impl WebGL2RenderResourceContext {
