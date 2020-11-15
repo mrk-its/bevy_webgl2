@@ -2,11 +2,9 @@ use bevy::prelude::*;
 
 /// This example illustrates how to create text and update it in a system. It displays the current FPS in the upper left hand corner.
 fn main() {
-    console_error_panic_hook::set_once();
-    console_log::init().unwrap();
-    info!("info");
     App::build()
-        .add_plugins(bevy_webgl2::DefaultPlugins)
+        .add_plugins(DefaultPlugins)
+        .add_plugin(bevy_webgl2::WebGL2Plugin::default())
         .add_startup_system(setup.system())
         .run();
 }

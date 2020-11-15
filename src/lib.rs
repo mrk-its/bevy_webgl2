@@ -40,7 +40,6 @@ pub struct WebGL2Plugin;
 impl Plugin for WebGL2Plugin {
     fn build(&self, app: &mut AppBuilder) {
         let resources = app.resources_mut();
-
         {
             let pipelines = resources.get_mut::<Assets<PipelineDescriptor>>().unwrap();
             let mut shaders = resources.get_mut::<Assets<Shader>>().unwrap();
