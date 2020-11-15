@@ -206,12 +206,6 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
         let ctx = self.render_context;
         let gl = &ctx.device.get_context();
 
-        bevy::log::info!(
-            "set_pipeline: {:?} {:?}",
-            pipeline.color_states,
-            pipeline.depth_stencil_state
-        );
-
         if let Some(state) = &pipeline.rasterization_state {
             match state.cull_mode {
                 CullMode::None => {
