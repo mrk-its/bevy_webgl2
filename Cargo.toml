@@ -80,3 +80,23 @@ path = "examples/3d/z_sort_debug.rs"
 [[example]]
 name = "text"
 path = "examples/ui/text.rs"
+
+[[example]]
+name = "button"
+path = "examples/ui/button.rs"
+
+[[example]]
+name = "font_atlas_debug"
+path = "examples/ui/font_atlas_debug.rs"
+
+[[example]]
+name = "text_debug"
+path = "examples/ui/text_debug.rs"
+
+[[example]]
+name = "ui"
+path = "examples/ui/ui.rs"
+
+[[example]]
+name = "breakout"
+path = "examples/game/breakout.rs"

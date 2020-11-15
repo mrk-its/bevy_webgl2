@@ -22,7 +22,7 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
                 ..Default::default()
             },
             text: Text {
-                value: "OK".to_string(),
+                value: "Hello!".to_string(),
                 font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                 style: TextStyle {
                     font_size: 60.0,
