@@ -3,7 +3,7 @@ use crate::{gl_call, renderer::*, Buffer};
 use bevy::asset::Handle;
 use bevy::render::{
     pass::RenderPass,
-    pipeline::{BindGroupDescriptorId, PipelineDescriptor},
+    pipeline::{BindGroupDescriptorId, BlendFactor, BlendOperation, CullMode, PipelineDescriptor},
     renderer::{BindGroupId, BufferId, BufferUsage, RenderContext},
 };
 use std::ops::Range;
@@ -203,10 +203,85 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
         let programs = resources.programs.read();
         let pipelines = resources.pipelines.read();
         let pipeline = pipelines.get(&pipeline_handle).unwrap();
-        let program = programs.get(&pipeline.shader_stages).unwrap();
-
         let ctx = self.render_context;
         let gl = &ctx.device.get_context();
-        gl_call!(gl.use_program(Some(&program)));
+
+        bevy::log::info!(
+            "set_pipeline: {:?} {:?}",
+            pipeline.color_states,
+            pipeline.depth_stencil_state
+        );
+
+        if let Some(state) = &pipeline.rasterization_state {
+            match state.cull_mode {
+                CullMode::None => {
+                    // TODO - can we always keep CULL_FACE enabled
+                    // and use cullFace(FRONT_AND_BACK)?
+                    // it seems do not work on contributors example
+                    gl_call!(gl.disable(Gl::CULL_FACE));
+                }
+                CullMode::Front => {
+                    gl_call!(gl.enable(Gl::CULL_FACE));
+                    gl_call!(gl.cull_face(Gl::FRONT));
+                }
+                CullMode::Back => {
+                    gl_call!(gl.enable(Gl::CULL_FACE));
+                    gl_call!(gl.cull_face(Gl::BACK));
+                }
+            }
+        }
+        if let Some(state) = &pipeline.depth_stencil_state {
+            let depth_func = match state.depth_compare {
+                bevy::render::pipeline::CompareFunction::Never => Gl::NEVER,
+                bevy::render::pipeline::CompareFunction::Less => Gl::LESS,
+                bevy::render::pipeline::CompareFunction::Equal => Gl::EQUAL,
+                bevy::render::pipeline::CompareFunction::LessEqual => Gl::LEQUAL,
+                bevy::render::pipeline::CompareFunction::Greater => Gl::GREATER,
+                bevy::render::pipeline::CompareFunction::NotEqual => Gl::NOTEQUAL,
+                bevy::render::pipeline::CompareFunction::GreaterEqual => Gl::GEQUAL,
+                bevy::render::pipeline::CompareFunction::Always => Gl::ALWAYS,
+            };
+            gl_call!(gl.depth_func(depth_func));
+        }
+
+        if let Some(state) = pipeline.color_states.get(0) {
+            gl_call!(gl.enable(Gl::BLEND));
+            fn blend_factor(factor: &BlendFactor) -> u32 {
+                match factor {
+                    BlendFactor::Zero => Gl::ZERO,
+                    BlendFactor::One => Gl::ONE,
+                    BlendFactor::SrcColor => Gl::SRC_COLOR,
+                    BlendFactor::OneMinusSrcColor => Gl::ONE_MINUS_SRC_COLOR,
+                    BlendFactor::SrcAlpha => Gl::SRC_ALPHA,
+                    BlendFactor::OneMinusSrcAlpha => Gl::ONE_MINUS_SRC_ALPHA,
+                    BlendFactor::DstColor => Gl::DST_COLOR,
+                    BlendFactor::OneMinusDstColor => Gl::ONE_MINUS_DST_COLOR,
+                    BlendFactor::DstAlpha => Gl::DST_ALPHA,
+                    BlendFactor::OneMinusDstAlpha => Gl::ONE_MINUS_DST_ALPHA,
+                    BlendFactor::SrcAlphaSaturated => Gl::SRC_ALPHA_SATURATE,
+                    BlendFactor::BlendColor => Gl::BLEND_COLOR,
+                    BlendFactor::OneMinusBlendColor => panic!("not supported"),
+                }
+            }
+            let src_factor = blend_factor(&state.color_blend.src_factor);
+            let dst_factor = blend_factor(&state.color_blend.dst_factor);
+            let src_alpha = blend_factor(&state.alpha_blend.src_factor);
+            let dst_alpha = blend_factor(&state.alpha_blend.dst_factor);
+            gl_call!(gl.blend_func_separate(src_factor, dst_factor, src_alpha, dst_alpha));
+            let op = match state.color_blend.operation {
+                BlendOperation::Add => Gl::FUNC_ADD,
+                BlendOperation::Subtract => Gl::FUNC_SUBTRACT,
+                BlendOperation::ReverseSubtract => Gl::FUNC_REVERSE_SUBTRACT,
+                BlendOperation::Min => Gl::MIN,
+                BlendOperation::Max => Gl::MAX,
+            };
+            gl_call!(gl.blend_equation(op));
+        } else {
+            gl_call!(gl.disable(Gl::BLEND));
+        }
+
+        let program = programs.get(&pipeline.shader_stages).unwrap();
+
+        gl_call!(gl.use_program(Some(&program.program)));
     }
 }

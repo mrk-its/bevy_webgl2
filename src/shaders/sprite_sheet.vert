@@ -26,11 +26,11 @@ layout(std140) uniform TextureAtlas_textures {
 };
 
 
-layout(std140) uniform Transform {
+layout(std140) uniform Transform {  // set=2 binding=0
     mat4 SpriteTransform;
 };
 
-layout(std140) uniform TextureAtlasSprite {
+layout(std140) uniform TextureAtlasSprite { // set=2 binding=1
     vec4 TextureAtlasSprite_color;
     uint TextureAtlasSprite_index;
 };

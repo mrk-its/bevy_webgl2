@@ -1,6 +1,6 @@
-use super::{compile_shader, link_program, reflect_layout, Gl, WebGlShader};
+use super::{compile_shader, link_program, reflect_layout, Gl};
 use crate::{
-    gl_call, Buffer, Device, GlBufferInfo, GlVertexBufferDescripror, WebGL2Pipeline,
+    gl_call, Buffer, Device, GlBufferInfo, GlShader, GlVertexBufferDescripror, WebGL2Pipeline,
     WebGL2RenderResourceBinding, WebGL2Resources,
 };
 use bevy::asset::{Assets, Handle, HandleUntyped};
@@ -61,7 +61,7 @@ impl WebGL2RenderResourceContext {
             .insert(descriptor.id, descriptor.clone());
     }
 
-    pub fn compile_shader(&self, shader: &Shader) -> WebGlShader {
+    pub fn compile_shader(&self, shader: &Shader) -> GlShader {
         let shader_type = match shader.stage {
             ShaderStage::Vertex => Gl::VERTEX_SHADER,
             ShaderStage::Fragment => Gl::FRAGMENT_SHADER,
@@ -126,10 +126,7 @@ impl WebGL2RenderResourceContext {
 
         gl_call!(gl.viewport(0, 0, size.width as i32, size.height as i32));
         gl_call!(gl.enable(Gl::BLEND));
-        gl_call!(gl.enable(Gl::CULL_FACE));
         gl_call!(gl.enable(Gl::DEPTH_TEST));
-        gl_call!(gl.blend_func(Gl::SRC_ALPHA, Gl::ONE_MINUS_SRC_ALPHA));
-
         self.device.set_context(gl);
         self.initialized = true;
     }
@@ -142,7 +139,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         shader_stages: &ShaderStages,
         _enforce_bevy_conventions: bool,
     ) -> PipelineLayout {
-        let gl_shaders: Vec<WebGlShader> = shader_stages
+        let gl_shaders: Vec<GlShader> = shader_stages
             .iter()
             .map(|handle| self.compile_shader(shaders.get(&handle).unwrap()))
             .collect();
@@ -403,16 +400,17 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
 
         let programs = self.resources.programs.read();
         let program = programs.get(&pipeline_descriptor.shader_stages).unwrap();
-        gl_call!(gl.use_program(Some(&program)));
+        gl_call!(gl.use_program(Some(&program.program)));
         info!("start binding");
         for bind_group in layout.bind_groups.iter() {
             for binding in bind_group.bindings.iter() {
-                let block_index = gl_call!(gl.get_uniform_block_index(&program, &binding.name));
+                let block_index =
+                    gl_call!(gl.get_uniform_block_index(&program.program, &binding.name));
                 info!("trying to bind {:?}", binding.name);
                 if (block_index as i32) < 0 {
                     info!("invalid block index for {:?}, skipping", &binding.name);
                     if let Some(uniform_location) =
-                        gl_call!(gl.get_uniform_location(&program, &binding.name))
+                        gl_call!(gl.get_uniform_location(&program.program, &binding.name))
                     {
                         info!("found uniform location: {:?}", uniform_location);
                         if let BindType::SampledTexture { .. } = binding.bind_type {
@@ -435,9 +433,9 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
                 let binding_point = self
                     .resources
                     .get_or_create_binding_point(bind_group.index, binding.index);
-                gl_call!(gl.uniform_block_binding(&program, block_index, binding_point));
+                gl_call!(gl.uniform_block_binding(&program.program, block_index, binding_point));
                 let _min_data_size = gl_call!(gl.get_active_uniform_block_parameter(
-                    &program,
+                    &program.program,
                     block_index,
                     Gl::UNIFORM_BLOCK_DATA_SIZE,
                 ))
@@ -456,7 +454,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         let vertex_buffer_descriptors = vertex_buffer_descriptors
             .iter()
             .map(|vertex_buffer_descriptor| {
-                GlVertexBufferDescripror::from(gl, program, vertex_buffer_descriptor)
+                GlVertexBufferDescripror::from(gl, &program.program, vertex_buffer_descriptor)
             })
             .collect();
         let vao = gl_call!(gl.create_vertex_array()).unwrap();
@@ -467,6 +465,9 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
             update_vao: false,
             index_buffer: None,
             vertex_buffer: None,
+            color_states: pipeline_descriptor.color_states.clone(),
+            depth_stencil_state: pipeline_descriptor.depth_stencil_state.clone(),
+            rasterization_state: pipeline_descriptor.rasterization_state.clone(),
         };
         self.resources
             .pipelines

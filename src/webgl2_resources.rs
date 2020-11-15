@@ -1,15 +1,16 @@
 use crate::{
     gl_call,
     renderer::{
-        gl_vertex_format, WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlTexture,
-        WebGlVertexArrayObject,
+        gl_vertex_format, WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlShader,
+        WebGlTexture, WebGlVertexArrayObject,
     },
 };
 use bevy::asset::{Handle, HandleUntyped};
 use bevy::render::{
     pipeline::{
-        BindGroupDescriptor, BindGroupDescriptorId, InputStepMode, PipelineDescriptor,
-        VertexAttributeDescriptor, VertexBufferDescriptor,
+        BindGroupDescriptor, BindGroupDescriptorId, ColorStateDescriptor,
+        DepthStencilStateDescriptor, InputStepMode, PipelineDescriptor,
+        RasterizationStateDescriptor, VertexAttributeDescriptor, VertexBufferDescriptor,
     },
     renderer::{BindGroupId, BufferId, BufferInfo, RenderResourceId, SamplerId, TextureId},
     shader::ShaderStages,
@@ -81,6 +82,9 @@ pub struct WebGL2Pipeline {
     pub vertex_buffer: Option<BufferId>,
     pub index_buffer: Option<BufferId>,
     pub update_vao: bool,
+    pub color_states: Vec<ColorStateDescriptor>,
+    pub depth_stencil_state: Option<DepthStencilStateDescriptor>,
+    pub rasterization_state: Option<RasterizationStateDescriptor>,
 }
 
 #[derive(Debug)]
@@ -109,11 +113,41 @@ pub struct GlBufferInfo {
     pub info: BufferInfo,
 }
 
+pub struct GlShader {
+    pub shader: WebGlShader,
+    pub bind_groups: GlBindGroups,
+}
+
+impl GlShader {
+    pub fn new(shader: WebGlShader, bind_groups: GlBindGroups) -> Self {
+        Self {
+            shader,
+            bind_groups,
+        }
+    }
+}
+
+pub type GlBindGroups = HashMap<String, (u32, u32)>;
+
+pub struct GlProgram {
+    pub program: WebGlProgram,
+    pub bind_groups: GlBindGroups,
+}
+
+impl GlProgram {
+    pub fn new(program: WebGlProgram, bind_groups: GlBindGroups) -> Self {
+        Self {
+            program,
+            bind_groups,
+        }
+    }
+}
+
 #[derive(Default, Clone)]
 pub struct WebGL2Resources {
     pub binding_point_seq: Arc<RwLock<u32>>,
     pub texture_unit_seq: Arc<RwLock<u32>>,
-    pub programs: Arc<RwLock<HashMap<ShaderStages, WebGlProgram>>>,
+    pub programs: Arc<RwLock<HashMap<ShaderStages, GlProgram>>>,
     pub binding_points: Arc<RwLock<HashMap<(u32, u32), u32>>>,
     pub texture_units: Arc<RwLock<HashMap<(u32, u32), u32>>>,
     pub bind_groups: Arc<RwLock<HashMap<BindGroupId, Vec<WebGL2RenderResourceBinding>>>>,

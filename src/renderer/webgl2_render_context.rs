@@ -2,7 +2,7 @@ use super::{Gl, WebGL2RenderResourceContext};
 
 use crate::{gl_call, Buffer, WebGL2RenderPass};
 use bevy::render::{
-    pass::{LoadOp, PassDescriptor, RenderPass},
+    pass::{LoadOp, Operations, PassDescriptor, RenderPass},
     renderer::{BufferId, RenderContext, RenderResourceBindings, RenderResourceContext, TextureId},
     texture::Extent3d,
 };
@@ -148,10 +148,24 @@ impl RenderContext for WebGL2RenderContext {
         _render_resource_bindings: &RenderResourceBindings,
         run_pass: &mut dyn Fn(&mut dyn RenderPass),
     ) {
+        let mut clear_mask = 0;
+        let gl = &self.device.get_context();
+
         if let LoadOp::Clear(c) = pass_descriptor.color_attachments[0].ops.load {
-            let gl = &self.device.get_context();
             gl_call!(gl.clear_color(c.r(), c.g(), c.b(), c.a()));
-            gl_call!(gl.clear(Gl::COLOR_BUFFER_BIT | Gl::DEPTH_BUFFER_BIT));
+            clear_mask |= Gl::COLOR_BUFFER_BIT;
+        }
+        if let Some(d) = &pass_descriptor.depth_stencil_attachment {
+            if let Some(Operations {
+                load: LoadOp::Clear(_),
+                ..
+            }) = d.depth_ops
+            {
+                clear_mask |= Gl::DEPTH_BUFFER_BIT;
+            }
+        }
+        if clear_mask > 0 {
+            gl_call!(gl.clear(clear_mask));
         }
         let mut render_pass = WebGL2RenderPass {
             render_context: self,
