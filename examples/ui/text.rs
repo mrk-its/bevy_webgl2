@@ -14,9 +14,9 @@ struct FpsText;
 fn setup(commands: &mut Commands, asset_server: Res<AssetServer>) {
     commands
         // 2d camera
-        .spawn(UiCameraComponents::default())
+        .spawn(UiCameraBundle::default())
         // texture
-        .spawn(TextComponents {
+        .spawn(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 ..Default::default()
