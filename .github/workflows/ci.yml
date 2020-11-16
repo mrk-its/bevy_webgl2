@@ -32,11 +32,16 @@ jobs:
             target
           key: ${{ runner.os }}-cargo-check-test-${{ matrix.toolchain }}-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Check wasm
+      #- name: Check wasm
+      #  uses: actions-rs/cargo@v1
+      #  with:
+      #    command: check
+      #    args: --target wasm32-unknown-unknown
+      - name: Compile examples
         uses: actions-rs/cargo@v1
         with:
-          command: check
-          args: --target wasm32-unknown-unknown --no-default-features --features bevy_winit,x11,hdr,bevy_gltf
+          command: test
+          args: --target wasm32-unknown-unknown --examples --no-run
 
   clean:
     runs-on: ubuntu-latest

@@ -2,6 +2,7 @@ use bevy::prelude::*;
 use rand::{prelude::SliceRandom, Rng};
 use std::collections::BTreeSet;
 
+
 fn main() {
     App::build()
         .add_plugins(bevy_webgl2::DefaultPlugins)
