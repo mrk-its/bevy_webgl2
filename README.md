@@ -11,7 +11,7 @@ cargo install basic-http-server
 to build `sprite` example:
 ```
 cargo build --release --example sprite --target wasm32-unknown-unknown
-wasm-bindgen --no-typescript --target web --out-name wasm --out-dir . ./target/wasm32-unknown-unknown/release/examples/sprite.wasm
+wasm-bindgen --no-typescript --target web --out-name wasm --out-dir ./target ./target/wasm32-unknown-unknown/release/examples/sprite.wasm
 basic-http-server
 ```
 
