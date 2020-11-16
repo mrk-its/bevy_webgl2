@@ -77,18 +77,16 @@ fn text_update_system(mut state: ResMut<State>, time: Res<Time>, mut query: Quer
 fn setup(commands: &mut Commands, asset_server: Res<AssetServer>, mut state: ResMut<State>) {
     let font_handle = asset_server.load("fonts/FiraSans-Bold.ttf");
     state.handle = font_handle.clone();
-    commands
-        .spawn(UiCameraBundle::default())
-        .spawn(TextBundle {
-            text: Text {
-                value: "a".to_string(),
-                font: font_handle,
-                style: TextStyle {
-                    font_size: 60.0,
-                    color: Color::WHITE,
-                    ..Default::default()
-                },
+    commands.spawn(UiCameraBundle::default()).spawn(TextBundle {
+        text: Text {
+            value: "a".to_string(),
+            font: font_handle,
+            style: TextStyle {
+                font_size: 60.0,
+                color: Color::WHITE,
+                ..Default::default()
             },
-            ..Default::default()
-        });
+        },
+        ..Default::default()
+    });
 }
