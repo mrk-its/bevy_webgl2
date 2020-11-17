@@ -2,15 +2,14 @@ use bevy::prelude::*;
 use rand::{prelude::SliceRandom, Rng};
 use std::collections::BTreeSet;
 
-
 fn main() {
     App::build()
         .add_plugins(bevy_webgl2::DefaultPlugins)
-        .add_startup_system(setup.system())
-        .add_system(velocity_system.system())
-        .add_system(move_system.system())
-        .add_system(collision_system.system())
-        .add_system(select_system.system())
+        .add_startup_system(setup)
+        .add_system(velocity_system)
+        .add_system(move_system)
+        .add_system(collision_system)
+        .add_system(select_system)
         .run();
 }
 
