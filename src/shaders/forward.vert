@@ -13,7 +13,7 @@ layout(std140) uniform Camera {
     mat4 ViewProj;
 };
 
-layout(std140) uniform Transform {
+layout(std140) uniform Transform {  // set=2 binding=0
     mat4 Model;
 };
 

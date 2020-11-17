@@ -19,12 +19,12 @@ layout(std140) uniform Camera {
     mat4 ViewProj;
 };
 
-layout(std140) uniform Lights {
+layout(std140) uniform Lights {  // set=1 binding=0
     uvec4 NumLights;
     Light SceneLights[MAX_LIGHTS];
 };
 
-layout(std140) uniform StandardMaterial_albedo {
+layout(std140) uniform StandardMaterial_albedo { // set=3 binding=0
     vec4 Albedo;
 };
 

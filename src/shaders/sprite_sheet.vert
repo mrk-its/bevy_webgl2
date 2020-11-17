@@ -12,7 +12,7 @@ layout(std140) uniform Camera {
 };
 
 // TODO: merge dimensions into "sprites" buffer when that is supported in the Uniforms derive abstraction
-layout(std140) uniform TextureAtlas_size {
+layout(std140) uniform TextureAtlas_size {  // set=1 binding=0
     vec2 AtlasSize;
 };
 
@@ -21,7 +21,7 @@ struct Rect {
     vec2 end;
 };
 
-layout(std140) uniform TextureAtlas_textures {
+layout(std140) uniform TextureAtlas_textures {  // set=1 binding=1
     Rect[256] Textures;
 };
 

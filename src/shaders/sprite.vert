@@ -10,11 +10,11 @@ layout(std140) uniform Camera {
     mat4 ViewProj;
 };
 
-layout(std140) uniform Transform {
+layout(std140) uniform Transform {  // set=2 binding=0
     mat4 Model;
 };
 
-layout(std140) uniform Sprite_size {
+layout(std140) uniform Sprite_size {  // set=2 binding=1
     vec2 size;
 };
 

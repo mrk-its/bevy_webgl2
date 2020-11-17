@@ -10,10 +10,10 @@ layout(std140) uniform Camera {
     mat4 ViewProj;
 };
 
-layout(std140) uniform Transform {
+layout(std140) uniform Transform {  // set=1 binding=0
     mat4 Object;
 };
-layout(std140) uniform Node_size {
+layout(std140) uniform Node_size {  // set=1 binding=1
     vec2 NodeSize;
 };
 

@@ -17,7 +17,7 @@ vec4 encodeColor(vec4 linearRGB_in)
 in vec2 v_Uv;
 out vec4 o_Target;
 
-layout(std140) uniform ColorMaterial_color {
+layout(std140) uniform ColorMaterial_color {  // set=2 binding=0
     vec4 Color;
 };
 

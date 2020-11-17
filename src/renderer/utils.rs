@@ -209,7 +209,7 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
 
         let bind_group = bind_groups.iter_mut().find(|bg| bg.index == group_index);
         if let Some(bind_group) = bind_group {
-            bind_group.bindings.push(binding)
+            bind_group.bindings.push(binding);
         } else {
             bind_groups.push(BindGroupDescriptor::new(group_index, vec![binding]));
         }
@@ -241,6 +241,9 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
         }
     }
     bind_groups.sort_by_key(|g| g.index);
+    for bind_group in bind_groups.iter_mut() {
+        bind_group.bindings.sort_by_key(|b| b.index);
+    }
     PipelineLayout {
         bind_groups,
         vertex_buffer_descriptors,
