@@ -13,7 +13,7 @@ pub use webgl2_renderer::*;
 pub use webgl2_resources::*;
 
 use bevy::asset::{Assets, Handle};
-use bevy::ecs::{IntoSystem, IntoThreadLocalSystem, Resources, World};
+use bevy::ecs::{Resources, World};
 use bevy::render::{
     pipeline::PipelineDescriptor,
     renderer::{free_shared_buffers_system, RenderResourceContext, SharedBuffers},
@@ -85,15 +85,9 @@ impl Plugin for WebGL2Plugin {
         let render_system = webgl2_render_system(resources);
         let handle_events_system = webgl2_handle_window_created_events_system();
         app.add_stage_before(RENDER_RESOURCE, "webgl2_pre_render_resource")
-            .add_system_to_stage(
-                "webgl2_pre_render_resource",
-                handle_events_system.thread_local_system(),
-            )
-            .add_system_to_stage(RENDER, render_system.thread_local_system())
-            .add_system_to_stage(
-                bevy::render::stage::POST_RENDER,
-                free_shared_buffers_system.system(),
-            );
+            .add_system_to_stage("webgl2_pre_render_resource", handle_events_system)
+            .add_system_to_stage(RENDER, render_system)
+            .add_system_to_stage(bevy::render::stage::POST_RENDER, free_shared_buffers_system);
     }
 }
 
