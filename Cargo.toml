@@ -18,7 +18,7 @@ default = [
 ]
 
 [dependencies]
-bevy = {git = "https://github.com/bevyengine/bevy", rev="4fecb899aaa33cf2ebc42ac94a32d4b5336c6e93", default-features = false}
+bevy = {git = "https://github.com/bevyengine/bevy", rev="01ba7c44255059f833c2b90d3d6b7ac7e9c025ca", default-features = false}
 winit = {version = "0.23.0", features = ["web-sys", "x11"], default-features = false}
 regex = "1.4"
 cfg-if = "1.0.0"
@@ -54,9 +54,9 @@ name = "sprite_sheet"
 path = "examples/2d/sprite_sheet.rs"
 
 # disabled as it do not compile on github Actions
-# [[example]]
-# name = "contributors"
-# path = "examples/2d/contributors.rs"
+[[example]]
+name = "contributors"
+path = "examples/2d/contributors.rs"
 
 [[example]]
 name = "3d_scene"
