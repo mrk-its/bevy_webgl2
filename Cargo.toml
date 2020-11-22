@@ -45,6 +45,9 @@ web-sys = {version = "0.3.45", features = [
 compile-time-run = "0.2"
 rand = "0.7"
 
+[profile.release]
+opt-level = 's'
+
 [[example]]
 name = "sprite"
 path = "examples/2d/sprite.rs"
