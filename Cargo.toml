@@ -104,3 +104,15 @@ path = "examples/ui/ui.rs"
 [[example]]
 name = "breakout"
 path = "examples/game/breakout.rs"
+
+[[example]]
+name = "shader_defs"
+path = "examples/shader/shader_defs.rs"
+
+[[example]]
+name = "shader_custom_material"
+path = "examples/shader/shader_custom_material.rs"
+
+[[example]]
+name = "mesh_custom_attribute"
+path = "examples/shader/mesh_custom_attribute.rs"
