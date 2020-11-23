@@ -1,10 +1,8 @@
 # WebGL2 rendering backend for Bevy game engine
 
-**bevy_webgl2** is external pluging for Bevy providing WebGL2 rendering backend on wasm target.
+**bevy_webgl2** is external pluging for Bevy providing WebGL2 rendering backend on wasm target. To see it in action take a look on live [examples](http://mrk.sed.pl/bevy-showcase/#contributors)
 
-## Running examples
-
-Take a look on prebuilt [examples](http://mrk.sed.pl/bevy-showcase/#contributors) in your browser and build them yourself:
+## Building examples
 
 ### Prerequisites
 
