@@ -1,0 +1,27 @@
+[env]
+ENV_DIR = {source="${CARGO_MAKE_PROFILE}", default_value = "debug", mapping = {release = "release"}}
+CARGO_WASM_EXAMPLE_PATH = "${CARGO_TARGET_DIR}/wasm32-unknown-unknown/${ENV_DIR}/examples/${CARGO_MAKE_TASK_ARGS}.wasm"
+CARGO_PROFILE = "dev"
+CARGO_TARGET_DIR = {source = "${CARGO_TARGET_DIR}", default_value = "target"}
+TARGET_DIR = "target"
+CARGO_MANIFEST_DIR = "${CARGO_MAKE_WORKING_DIRECTORY}"
+ARG1 = "${@}"
+
+[env.release]
+CARGO_RELEASE_ARGS = "--release"
+
+[tasks.cargo-build-example]
+args = ["build", "--target", "wasm32-unknown-unknown", "--example", "${CARGO_MAKE_TASK_ARGS}", "@@split(CARGO_RELEASE_ARGS, )"]
+command = "cargo"
+
+[tasks.build-example]
+args = ["--remove-name-section", "--remove-producers-section", "--out-dir", "${TARGET_DIR}", "--out-name", "wasm", "--target", "web", "--no-typescript", "${CARGO_WASM_EXAMPLE_PATH}"]
+command = "wasm-bindgen"
+dependencies = ["cargo-build-example"]
+
+[tasks.example]
+command = "basic-http-server"
+dependencies = ["build-example"]
+
+[tasks.test]
+disabled = true
