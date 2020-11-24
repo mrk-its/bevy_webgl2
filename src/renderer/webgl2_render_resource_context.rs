@@ -548,7 +548,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
     }
     fn get_specialized_shader(&self, shader: &Shader, macros: Option<&[String]>) -> Shader {
         if let ShaderSource::Glsl(source) = &shader.source {
-            let source = (&source).strip_prefix('\n').unwrap();
+            let source = source.trim_start();
             assert!(source.starts_with("#version"));
             let eol_index = source.find('\n').unwrap();
             let (version_str, source) = source.split_at(eol_index);
