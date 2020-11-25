@@ -20,7 +20,8 @@ pub fn compile_shader(
 ) -> Result<GlShader, String> {
     let mut bind_groups = GlBindGroups::default();
     let bind_group_re =
-        regex::Regex::new(r"uniform\s+(\w+)\s*\{\s*//\s*set\s*=\s*(\d+)[, ]+binding\s*=\s*(\d+)").unwrap();
+        regex::Regex::new(r"uniform\s+(\w+)\s*\{\s*//\s*set\s*=\s*(\d+)[, ]+binding\s*=\s*(\d+)")
+            .unwrap();
     for cap in bind_group_re.captures_iter(source) {
         bind_groups.insert(
             cap[1].to_string(),
