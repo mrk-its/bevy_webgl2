@@ -97,7 +97,7 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
     for index in 0..active_attributes {
         let info: WebGlActiveInfo = gl.get_active_attrib(&program.program, index).unwrap();
         let name = info.name();
-        if name == "gl_VertexID" {
+        if name == "gl_VertexID" || name == "gl_InstanceID" {
             continue;
         }
 

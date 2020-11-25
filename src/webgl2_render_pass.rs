@@ -114,15 +114,16 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
         }
     }
 
-    fn draw_indexed(&mut self, indices: Range<u32>, _base_vertex: i32, _instances: Range<u32>) {
+    fn draw_indexed(&mut self, indices: Range<u32>, _base_vertex: i32, instances: Range<u32>) {
         let ctx = &self.render_context;
         let gl = &ctx.device.get_context();
         self.setup_vao();
-        gl_call!(gl.draw_elements_with_i32(
+        gl_call!(gl.draw_elements_instanced_with_i32(
             Gl::TRIANGLES,
             indices.end as i32,
             Gl::UNSIGNED_INT,
-            indices.start as i32
+            indices.start as i32,
+            instances.end as i32,
         ));
         let gl_null = None;
         gl_call!(gl.bind_vertex_array(gl_null));
