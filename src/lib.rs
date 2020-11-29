@@ -14,13 +14,13 @@ pub use webgl2_resources::*;
 
 use bevy::asset::{Assets, Handle};
 use bevy::ecs::{Resources, World};
+use bevy::reflect::TypeUuid;
 use bevy::render::{
     pipeline::PipelineDescriptor,
     renderer::{free_shared_buffers_system, RenderResourceContext, SharedBuffers},
     shader::{Shader, ShaderStage},
     stage::{RENDER, RENDER_RESOURCE},
 };
-use bevy::type_registry::TypeUuid;
 
 pub const SPRITE_PIPELINE_HANDLE: Handle<PipelineDescriptor> =
     Handle::weak_from_u64(PipelineDescriptor::TYPE_UUID, 2785347840338765446);
