@@ -156,18 +156,19 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
         let textures = resources.textures.read();
         let gl = &self.render_context.device.get_context();
         for (i, binding) in bind_group.iter().enumerate() {
-            let offset = dynamic_uniform_indices.map_or(0, |indices| indices[i]);
             match binding {
                 crate::WebGL2RenderResourceBinding::Buffer {
                     binding_point,
                     buffer,
-                    size,
+                    range,
                 } => {
+                    let offset =
+                        dynamic_uniform_indices.map_or(range.start as u32, |indices| indices[i]);
                     let buffer = buffers.get(&buffer).unwrap();
                     let size = if buffer.info.buffer_usage.contains(BufferUsage::STORAGE) {
                         STORAGE_BUFFER_SIZE
                     } else {
-                        *size as usize
+                        (range.end - range.start) as usize
                     };
                     if let Buffer::WebGlBuffer(buffer_id) = &buffer.buffer {
                         gl_call!(gl.bind_buffer_range_with_i32_and_i32(

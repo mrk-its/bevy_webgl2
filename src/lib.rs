@@ -17,7 +17,7 @@ use bevy::ecs::{Resources, World};
 use bevy::reflect::TypeUuid;
 use bevy::render::{
     pipeline::PipelineDescriptor,
-    renderer::{free_shared_buffers_system, RenderResourceContext, SharedBuffers},
+    renderer::{shared_buffers_update_system, RenderResourceContext, SharedBuffers},
     shader::{Shader, ShaderStage},
     stage::{RENDER, RENDER_RESOURCE},
 };
@@ -87,7 +87,10 @@ impl Plugin for WebGL2Plugin {
         app.add_stage_before(RENDER_RESOURCE, "webgl2_pre_render_resource")
             .add_system_to_stage("webgl2_pre_render_resource", handle_events_system)
             .add_system_to_stage(RENDER, render_system)
-            .add_system_to_stage(bevy::render::stage::POST_RENDER, free_shared_buffers_system);
+            .add_system_to_stage(
+                bevy::render::stage::POST_RENDER,
+                shared_buffers_update_system,
+            );
     }
 }
 
@@ -123,10 +126,9 @@ pub fn webgl2_handle_window_created_events_system() -> impl FnMut(&mut World, &m
                 render_resource_context.initialize(&winit_window);
                 render_resource_context
             };
-            resources.insert::<Box<dyn RenderResourceContext>>(Box::new(
-                render_resource_context.clone(),
-            ));
-            resources.insert(SharedBuffers::new(Box::new(render_resource_context)));
+            resources.insert::<Box<dyn RenderResourceContext>>(Box::new(render_resource_context));
+            //resources.insert(SharedBuffers::new(Box::new(render_resource_context)));
+            resources.insert(SharedBuffers::new(4096));
         }
     }
 }

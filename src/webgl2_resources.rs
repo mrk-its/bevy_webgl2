@@ -18,6 +18,7 @@ use bevy::render::{
 };
 use bevy::utils::HashMap;
 use parking_lot::RwLock;
+use std::ops::Range;
 use std::{borrow::Cow, sync::Arc};
 
 pub struct GlVertexFormat {
@@ -92,7 +93,7 @@ pub enum WebGL2RenderResourceBinding {
     Buffer {
         binding_point: u32,
         buffer: BufferId,
-        size: u64,
+        range: Range<u64>,
     },
     Texture {
         texture_unit: u32,

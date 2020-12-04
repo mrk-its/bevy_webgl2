@@ -502,7 +502,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
                     WebGL2RenderResourceBinding::Buffer {
                         binding_point,
                         buffer: *buffer,
-                        size: range.end - range.start,
+                        range: range.clone(),
                     }
                 }
                 RenderResourceBinding::Texture(texture) => {
@@ -569,4 +569,5 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
             panic!("spirv shader is not supported");
         }
     }
+    fn remove_stale_bind_groups(&self) {}
 }
