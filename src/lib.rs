@@ -28,7 +28,7 @@ pub const SPRITE_PIPELINE_HANDLE: HandleUntyped =
 pub const SPRITE_SHEET_PIPELINE_HANDLE: HandleUntyped =
     HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 9016885805180281612);
 
-    pub const FORWARD_PIPELINE_HANDLE: HandleUntyped =
+pub const FORWARD_PIPELINE_HANDLE: HandleUntyped =
     HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 13148362314012771389);
 
 pub const UI_PIPELINE_HANDLE: HandleUntyped =
