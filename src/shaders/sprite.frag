@@ -6,12 +6,12 @@ in vec2 v_Uv;
 
 out vec4 o_Target;
 
-layout(std140) uniform ColorMaterial_color {  // set=1 binding=0
+layout(std140) uniform ColorMaterial_color {  // set = 1, binding = 0
     vec4 Color;
 };
 
 # ifdef COLORMATERIAL_TEXTURE
-uniform sampler2D ColorMaterial_texture;
+uniform sampler2D ColorMaterial_texture;  // set = 1, binding = 1
 # endif
 
 vec4 encodeSRGB(vec4 linearRGB_in)

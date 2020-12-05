@@ -7,7 +7,7 @@ in vec4 v_Color;
 
 out vec4 o_Target;
 
-uniform sampler2D TextureAtlas_texture;
+uniform sampler2D TextureAtlas_texture; // set = 1, binding = 2
 // uniform sampler TextureAtlas_texture_sampler;
 
 vec4 encodeSRGB(vec4 linearRGB_in)

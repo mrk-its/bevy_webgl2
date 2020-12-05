@@ -12,7 +12,7 @@ layout(std140) uniform Camera {
 };
 
 // TODO: merge dimensions into "sprites" buffer when that is supported in the Uniforms derive abstraction
-layout(std140) uniform TextureAtlas_size {  // set=1 binding=0
+layout(std140) uniform TextureAtlas_size {  // set = 1, binding = 0
     vec2 AtlasSize;
 };
 
@@ -21,16 +21,16 @@ struct Rect {
     vec2 end;
 };
 
-layout(std140) uniform TextureAtlas_textures {  // set=1 binding=1
+layout(std140) uniform TextureAtlas_textures {  // set = 1, binding = 1
     Rect[256] Textures;
 };
 
 
-layout(std140) uniform Transform {  // set=2 binding=0
+layout(std140) uniform Transform {  // set = 2, binding = 0
     mat4 SpriteTransform;
 };
 
-layout(std140) uniform TextureAtlasSprite { // set=2 binding=1
+layout(std140) uniform TextureAtlasSprite { // set = 2, binding = 1
     vec4 TextureAtlasSprite_color;
     uint TextureAtlasSprite_index;
 };

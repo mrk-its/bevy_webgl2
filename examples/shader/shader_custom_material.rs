@@ -44,7 +44,7 @@ const FRAGMENT_SHADER: &str = r#"
 #version 300 es
 precision highp float;
 out vec4 o_Target;
-layout(std140) uniform MyMaterial_color { // set = 1, binding = 1
+layout(std140) uniform MyMaterial_color { // set = 2, binding = 0
     vec4 color;
 };
 vec4 encodeSRGB(vec4 linearRGB_in) {

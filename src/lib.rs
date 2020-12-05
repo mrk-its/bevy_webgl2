@@ -12,7 +12,7 @@ pub use webgl2_render_pass::*;
 pub use webgl2_renderer::*;
 pub use webgl2_resources::*;
 
-use bevy::asset::{Assets, Handle};
+use bevy::asset::{Assets, HandleUntyped};
 use bevy::ecs::{Resources, World};
 use bevy::reflect::TypeUuid;
 use bevy::render::{
@@ -22,17 +22,17 @@ use bevy::render::{
     stage::{RENDER, RENDER_RESOURCE},
 };
 
-pub const SPRITE_PIPELINE_HANDLE: Handle<PipelineDescriptor> =
-    Handle::weak_from_u64(PipelineDescriptor::TYPE_UUID, 2785347840338765446);
+pub const SPRITE_PIPELINE_HANDLE: HandleUntyped =
+    HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 2785347840338765446);
 
-pub const SPRITE_SHEET_PIPELINE_HANDLE: Handle<PipelineDescriptor> =
-    Handle::weak_from_u64(PipelineDescriptor::TYPE_UUID, 9016885805180281612);
+pub const SPRITE_SHEET_PIPELINE_HANDLE: HandleUntyped =
+    HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 9016885805180281612);
 
-pub const FORWARD_PIPELINE_HANDLE: Handle<PipelineDescriptor> =
-    Handle::weak_from_u64(PipelineDescriptor::TYPE_UUID, 13148362314012771389);
+    pub const FORWARD_PIPELINE_HANDLE: HandleUntyped =
+    HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 13148362314012771389);
 
-pub const UI_PIPELINE_HANDLE: Handle<PipelineDescriptor> =
-    Handle::weak_from_u64(PipelineDescriptor::TYPE_UUID, 3234320022263993878);
+pub const UI_PIPELINE_HANDLE: HandleUntyped =
+    HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 3234320022263993878);
 
 #[derive(Default)]
 pub struct WebGL2Plugin;

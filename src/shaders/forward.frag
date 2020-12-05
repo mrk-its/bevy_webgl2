@@ -19,18 +19,18 @@ layout(std140) uniform Camera {
     mat4 ViewProj;
 };
 
-layout(std140) uniform Lights {  // set=1 binding=0
+layout(std140) uniform Lights {  // set = 1, binding = 0
     vec3 AmbientColor;
     uvec4 NumLights;
     Light SceneLights[MAX_LIGHTS];
 };
 
-layout(std140) uniform StandardMaterial_albedo { // set=3 binding=0
+layout(std140) uniform StandardMaterial_albedo { // set = 3, binding = 0
     vec4 Albedo;
 };
 
 #ifdef STANDARDMATERIAL_ALBEDO_TEXTURE
-uniform sampler2D StandardMaterial_albedo_texture;
+uniform sampler2D StandardMaterial_albedo_texture;  // set = 3, binding = 1
 #endif
 
 vec4 encodeSRGB(vec4 linearRGB_in)

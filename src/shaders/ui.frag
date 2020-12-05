@@ -17,12 +17,12 @@ vec4 encodeColor(vec4 linearRGB_in)
 in vec2 v_Uv;
 out vec4 o_Target;
 
-layout(std140) uniform ColorMaterial_color {  // set=2 binding=0
+layout(std140) uniform ColorMaterial_color {  // set = 2, binding = 0
     vec4 Color;
 };
 
 # ifdef COLORMATERIAL_TEXTURE
-uniform TEXTURE_2D ColorMaterial_texture;
+uniform TEXTURE_2D ColorMaterial_texture;  // set = 2, binding = 1
 # endif
 
 void main() {

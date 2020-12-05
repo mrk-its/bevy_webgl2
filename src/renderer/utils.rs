@@ -29,6 +29,16 @@ pub fn compile_shader(
         );
     }
 
+    let bind_group_re =
+        regex::Regex::new(r"sampler2D\s+(\w+)\s*;\s*//\s*set\s*=\s*(\d+)[, ]+binding\s*=\s*(\d+)")
+            .unwrap();
+    for cap in bind_group_re.captures_iter(source) {
+        bind_groups.insert(
+            cap[1].to_string(),
+            (cap[2].parse().unwrap(), cap[3].parse().unwrap()),
+        );
+    }
+
     let shader = gl_call!(context.create_shader(shader_type))
         .ok_or_else(|| String::from("Unable to create shader object"))?;
     gl_call!(context.shader_source(&shader, source));
@@ -224,21 +234,32 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
         let info = gl
             .get_active_uniform(&program.program, uniform_index)
             .unwrap();
+        let name = info.name();
+
         if info.type_() == Gl::SAMPLER_2D {
-            let bindings = vec![BindingDescriptor {
+            let (group_index, index) =
+                if let Some((group_index, index)) = program.bind_groups.get(&name) {
+                    (*group_index, *index)
+                } else {
+                    (next_group_index(&mut used_indices), 0)
+                };
+
+            let binding = BindingDescriptor {
                 name: info.name(),
-                index: 0,
+                index: index,
                 bind_type: BindType::SampledTexture {
                     multisampled: false,
                     dimension: TextureViewDimension::D2,
                     component_type: TextureComponentType::Float,
                 },
                 shader_stage: BindingShaderStage::FRAGMENT,
-            }];
-            bind_groups.push(BindGroupDescriptor::new(
-                next_group_index(&mut used_indices),
-                bindings,
-            ));
+            };
+            let bind_group = bind_groups.iter_mut().find(|bg| bg.index == group_index);
+            if let Some(bind_group) = bind_group {
+                bind_group.bindings.push(binding);
+            } else {
+                bind_groups.push(BindGroupDescriptor::new(group_index, vec![binding]));
+            }
         }
     }
     bind_groups.sort_by_key(|g| g.index);
