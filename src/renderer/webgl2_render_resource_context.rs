@@ -168,7 +168,12 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
 
     fn create_swap_chain(&self, window: &Window) {
         let gl = &self.device.get_context();
-        gl_call!(gl.viewport(0, 0, window.width() as i32, window.height() as i32));
+        gl_call!(gl.viewport(
+            0,
+            0,
+            window.scaled_width() as i32,
+            window.scaled_height() as i32
+        ));
     }
 
     fn next_swap_chain_texture(&self, _window: &Window) -> TextureId {
