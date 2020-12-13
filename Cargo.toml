@@ -49,6 +49,9 @@ rand = "0.7"
 
 [profile.release]
 opt-level = 's'
+codegen-units = 1
+lto = true
+# opt-level = 3
 
 [[example]]
 name = "sprite"
