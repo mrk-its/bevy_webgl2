@@ -18,10 +18,9 @@ default = [
 ]
 
 [dependencies]
-# bevy = {git = "https://github.com/bevyengine/bevy", rev="509b138e8fa3ea250393de40c33cc857c72134d3", default-features = false}
-bevy = {path = "../bevy", default-features = false}
+bevy = {git = "https://github.com/bevyengine/bevy", rev="509b138e8fa3ea250393de40c33cc857c72134d3", default-features = false}
 
-winit = {version = "0.24.0", features = ["web-sys"], default-features = false}
+winit = {version = "0.23.0", features = ["web-sys", "x11"], default-features = false}
 regex = "1.4"
 cfg-if = "1.0.0"
 js-sys = "0.3.45"
