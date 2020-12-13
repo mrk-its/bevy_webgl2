@@ -47,7 +47,6 @@ fn setup(
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
     let contribs = contributors();
-
     let texture_handle = asset_server.load("branding/icon.png");
 
     commands
@@ -128,12 +127,13 @@ fn select_system(
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut sel: ResMut<ContributorSelection>,
     mut dq: Query<Mut<Text>, With<ContributorDisplay>>,
+    time: Res<Time>,
     mut tq: Query<Mut<Timer>, With<SelectTimer>>,
     mut q: Query<(&Contributor, &Handle<ColorMaterial>, &mut Transform)>,
 ) {
     let mut timer_fired = false;
     for mut t in tq.iter_mut() {
-        if !t.just_finished() {
+        if !t.tick(time.delta_seconds()).just_finished() {
             continue;
         }
         t.reset();
@@ -233,11 +233,11 @@ fn collision_system(
 
     let win = wins.get_primary().unwrap();
 
-    let ceiling = (win.height() / 2) as f32;
-    let ground = -((win.height() / 2) as f32);
+    let ceiling = win.logical_height() / 2.;
+    let ground = -(win.logical_height() / 2.);
 
-    let wall_left = -((win.width() / 2) as f32);
-    let wall_right = (win.width() / 2) as f32;
+    let wall_left = -(win.logical_width() / 2.);
+    let wall_right = win.logical_width() / 2.;
 
     for (mut v, mut t) in q.iter_mut() {
         let left = t.translation.x - SPRITE_SIZE / 2.0;

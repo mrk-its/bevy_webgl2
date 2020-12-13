@@ -13,7 +13,7 @@ use bevy::render::{
         BindGroup, BufferId, BufferInfo, BufferUsage, RenderResourceBinding, RenderResourceContext,
         RenderResourceId, SamplerId, TextureId,
     },
-    shader::{Shader, ShaderSource, ShaderStage, ShaderStages},
+    shader::{Shader, ShaderError, ShaderSource, ShaderStage, ShaderStages},
     texture::{SamplerDescriptor, TextureDescriptor},
 };
 use bevy::utils::HashMap;
@@ -551,7 +551,11 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
             .read()
             .contains_key(&bind_group_descriptor_id);
     }
-    fn get_specialized_shader(&self, shader: &Shader, macros: Option<&[String]>) -> Shader {
+    fn get_specialized_shader(
+        &self,
+        shader: &Shader,
+        macros: Option<&[String]>,
+    ) -> Result<Shader, ShaderError> {
         if let ShaderSource::Glsl(source) = &shader.source {
             let source = source.trim_start();
             assert!(source.starts_with("#version"));
@@ -566,10 +570,10 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
             }
             processed.push_str("#define WEBGL\n");
             processed.push_str(source);
-            Shader {
+            Ok(Shader {
                 source: ShaderSource::Glsl(processed),
                 ..*shader
-            }
+            })
         } else {
             panic!("spirv shader is not supported");
         }
