@@ -13,7 +13,7 @@ pub use webgl2_renderer::*;
 pub use webgl2_resources::*;
 
 use bevy::asset::{Assets, HandleUntyped};
-use bevy::ecs::{Resources, World, SystemStage};
+use bevy::ecs::{Resources, SystemStage, World};
 use bevy::reflect::TypeUuid;
 use bevy::render::{
     pipeline::PipelineDescriptor,
@@ -84,13 +84,17 @@ impl Plugin for WebGL2Plugin {
         }
         let render_system = webgl2_render_system(resources);
         let handle_events_system = webgl2_handle_window_created_events_system();
-        app.add_stage_before(RENDER_RESOURCE, "webgl2_pre_render_resource", SystemStage::parallel())
-            .add_system_to_stage("webgl2_pre_render_resource", handle_events_system)
-            .add_system_to_stage(RENDER, render_system)
-            .add_system_to_stage(
-                bevy::render::stage::POST_RENDER,
-                shared_buffers_update_system,
-            );
+        app.add_stage_before(
+            RENDER_RESOURCE,
+            "webgl2_pre_render_resource",
+            SystemStage::parallel(),
+        )
+        .add_system_to_stage("webgl2_pre_render_resource", handle_events_system)
+        .add_system_to_stage(RENDER, render_system)
+        .add_system_to_stage(
+            bevy::render::stage::POST_RENDER,
+            shared_buffers_update_system,
+        );
     }
 }
 
