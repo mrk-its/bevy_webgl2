@@ -171,8 +171,8 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         gl_call!(gl.viewport(
             0,
             0,
-            window.scaled_width() as i32,
-            window.scaled_height() as i32
+            window.physical_width() as i32,
+            window.physical_height() as i32
         ));
     }
 
