@@ -5,11 +5,11 @@ use std::collections::BTreeSet;
 fn main() {
     App::build()
         .add_plugins(bevy_webgl2::DefaultPlugins)
-        .add_startup_system(setup)
-        .add_system(velocity_system)
-        .add_system(move_system)
-        .add_system(collision_system)
-        .add_system(select_system)
+        .add_startup_system(setup.system())
+        .add_system(velocity_system.system())
+        .add_system(move_system.system())
+        .add_system(collision_system.system())
+        .add_system(select_system.system())
         .run();
 }
 
@@ -233,11 +233,11 @@ fn collision_system(
 
     let win = wins.get_primary().unwrap();
 
-    let ceiling = win.logical_height() / 2.;
-    let ground = -(win.logical_height() / 2.);
+    let ceiling = win.height() / 2.;
+    let ground = -(win.height() / 2.);
 
-    let wall_left = -(win.logical_width() / 2.);
-    let wall_right = win.logical_width() / 2.;
+    let wall_left = -(win.width() / 2.);
+    let wall_right = win.width() / 2.;
 
     for (mut v, mut t) in q.iter_mut() {
         let left = t.translation.x - SPRITE_SIZE / 2.0;
