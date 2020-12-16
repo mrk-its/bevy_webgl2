@@ -6,6 +6,8 @@ keywords = ["bevy", "webgl", "webgl2"]
 license = "MIT"
 name = "bevy_webgl2"
 version = "0.3.0"
+repository = "https://github.com/mrk-its/bevy_webgl2"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
