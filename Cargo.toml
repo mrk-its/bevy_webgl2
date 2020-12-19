@@ -5,7 +5,7 @@ edition = "2018"
 keywords = ["bevy", "webgl", "webgl2"]
 license = "MIT"
 name = "bevy_webgl2"
-version = "0.3.0"
+version = "0.4.0"
 repository = "https://github.com/mrk-its/bevy_webgl2"
 readme = "README.md"
 
@@ -20,9 +20,8 @@ default = [
 ]
 
 [dependencies]
-bevy = {git = "https://github.com/bevyengine/bevy", rev="841755aaf23acfd55b375c37390daeb302c5b30b", default-features = false}
-
 winit = {version = "0.24.0", features = ["web-sys"]}
+bevy = {version = "0.4.0", default-features = false}
 regex = "1.4"
 cfg-if = "1.0.0"
 js-sys = "0.3.45"
@@ -63,9 +62,9 @@ name = "sprite_sheet"
 path = "examples/2d/sprite_sheet.rs"
 
 # disabled as it do not compile on github Actions
-[[example]]
-name = "contributors"
-path = "examples/2d/contributors.rs"
+# [[example]]
+# name = "contributors"
+# path = "examples/2d/contributors.rs"
 
 [[example]]
 name = "3d_scene"
