@@ -9,6 +9,9 @@
 ```
 cargo install cargo-make
 ```
+```
+rustup target add wasm32-unknown-unknown
+```
 
 to build and serve `sprite` example do:
 ```
