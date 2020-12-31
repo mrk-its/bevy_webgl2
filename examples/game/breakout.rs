@@ -58,12 +58,12 @@ fn setup(
         // ball
         .spawn(SpriteBundle {
             material: materials.add(Color::rgb(1.0, 0.5, 0.5).into()),
-            transform: Transform::from_translation(Vec3::new(0.0, -100.0, 1.0)),
+            transform: Transform::from_translation(Vec3::new(0.0, -50.0, 1.0)),
             sprite: Sprite::new(Vec2::new(30.0, 30.0)),
             ..Default::default()
         })
         .with(Ball {
-            velocity: 400.0 * Vec3::new(0.5, 0.5, 0.0).normalize(),
+            velocity: 400.0 * Vec3::new(0.5, -0.5, 0.0).normalize(),
         })
         // scoreboard
         .spawn(TextBundle {
@@ -111,12 +111,12 @@ fn setup(
         })
         .with(Collider::Solid)
         // bottom
-        // .spawn(SpriteBundle {
-        //     material: wall_material.clone(),
-        //     transform: Transform::from_translation(Vec3::new(0.0, -bounds.y / 2.0, 0.0)),
-        //     sprite: Sprite::new(Vec2::new(bounds.x + wall_thickness, wall_thickness)),
-        //     ..Default::default()
-        // })
+        .spawn(SpriteBundle {
+            material: wall_material.clone(),
+            transform: Transform::from_translation(Vec3::new(0.0, -bounds.y / 2.0, 0.0)),
+            sprite: Sprite::new(Vec2::new(bounds.x + wall_thickness, wall_thickness)),
+            ..Default::default()
+        })
         .with(Collider::Solid)
         // top
         .spawn(SpriteBundle {
