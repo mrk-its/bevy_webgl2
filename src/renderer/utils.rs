@@ -127,25 +127,12 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
         });
         shader_location += 1;
     }
-    let mut bind_groups = vec![];
+    let mut bind_groups: Vec<BindGroupDescriptor> = Vec::new();
 
     let active_uniform_blocks = gl
         .get_program_parameter(&program.program, Gl::ACTIVE_UNIFORM_BLOCKS)
         .as_f64()
         .unwrap() as u32;
-
-    bind_groups.push(BindGroupDescriptor::new(
-        0,
-        vec![BindingDescriptor {
-            name: "Camera".to_string(),
-            index: 0,
-            bind_type: BindType::Uniform {
-                dynamic: false,
-                property: UniformProperty::Struct(vec![UniformProperty::Mat4]),
-            },
-            shader_stage: BindingShaderStage::VERTEX | BindingShaderStage::FRAGMENT,
-        }],
-    ));
 
     let mut used_indices: HashSet<u32> = HashSet::default();
     used_indices.extend(bind_groups.iter().map(|g| g.index));
@@ -165,6 +152,20 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
             .get_active_uniform_block_name(&program.program, uniform_index)
             .unwrap();
         if name == "Camera" {
+            let camera_descriptor = BindGroupDescriptor::new(
+                0,
+                vec![BindingDescriptor {
+                    name: "Camera".to_string(),
+                    index: 0,
+                    bind_type: BindType::Uniform {
+                        dynamic: false,
+                        property: UniformProperty::Struct(vec![UniformProperty::Mat4]),
+                    },
+                    shader_stage: BindingShaderStage::VERTEX | BindingShaderStage::FRAGMENT,
+                }],
+            );
+            used_indices.insert(camera_descriptor.index);
+            bind_groups.push(camera_descriptor);
             continue;
         }
         let size = gl

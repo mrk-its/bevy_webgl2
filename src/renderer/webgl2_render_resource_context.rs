@@ -150,7 +150,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         let gl = &self.device.get_context();
 
         let layout = reflect_layout(&*gl, &program);
-        info!("reflected layoyt: {:#?}", layout);
+        info!("reflected layout: {:#?}", layout);
         self.resources
             .programs
             .write()
@@ -473,7 +473,11 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
             color_states: pipeline_descriptor.color_states.clone(),
             depth_stencil_state: pipeline_descriptor.depth_stencil_state.clone(),
             rasterization_state: pipeline_descriptor.rasterization_state.clone(),
+            scissors_state: None,
         };
+        self.pipeline_descriptors
+            .write()
+            .insert(pipeline_handle.clone(), pipeline_descriptor.clone());
         self.resources
             .pipelines
             .write()

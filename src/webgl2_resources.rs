@@ -86,6 +86,15 @@ pub struct WebGL2Pipeline {
     pub color_states: Vec<ColorStateDescriptor>,
     pub depth_stencil_state: Option<DepthStencilStateDescriptor>,
     pub rasterization_state: Option<RasterizationStateDescriptor>,
+    pub scissors_state: Option<ScissorsState>,
+}
+
+#[derive(Clone)]
+pub struct ScissorsState {
+    pub x: i32,
+    pub y: i32,
+    pub w: i32,
+    pub h: i32,
 }
 
 #[derive(Debug)]

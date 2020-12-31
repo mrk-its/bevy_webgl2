@@ -1,15 +1,18 @@
-use crate::renderer::WebGL2RenderContext;
-use crate::{gl_call, renderer::*, Buffer};
+use crate::{gl_call, renderer::*, Buffer, ScissorsState};
 use bevy::asset::Handle;
 use bevy::render::{
     pass::RenderPass,
-    pipeline::{BindGroupDescriptorId, BlendFactor, BlendOperation, CullMode, PipelineDescriptor},
+    pipeline::{
+        BindGroupDescriptorId, BlendFactor, BlendOperation, CullMode, IndexFormat,
+        PipelineDescriptor,
+    },
     renderer::{BindGroupId, BufferId, BufferUsage, RenderContext},
 };
 use std::ops::Range;
+
 pub struct WebGL2RenderPass<'a> {
     pub render_context: &'a WebGL2RenderContext,
-    pub pipeline_descriptor: Option<&'a PipelineDescriptor>,
+    pub pipeline_descriptor: Option<PipelineDescriptor>,
     pub pipeline: Option<Handle<PipelineDescriptor>>,
 }
 
@@ -70,8 +73,35 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
     fn get_render_context(&self) -> &dyn RenderContext {
         self.render_context
     }
-    fn set_scissor_rect(&mut self, _: u32, _: u32, _: u32, _: u32) {
-        todo!();
+    fn set_scissor_rect(&mut self, x: u32, y: u32, w: u32, h: u32) {
+        let pipeline_handle = self.pipeline.as_ref().unwrap();
+        let mut pipelines = self
+            .render_context
+            .render_resource_context
+            .resources
+            .pipelines
+            .write();
+        let pipeline = pipelines.get_mut(pipeline_handle).unwrap();
+
+        let gl = &self.render_context.device.get_context();
+
+        // TODO - there might be a better way to get a viewport size (make WindowDescriptor available in RenderPass?)
+        let viewport: js_sys::Int32Array = gl_call!(gl.get_parameter(Gl::VIEWPORT))
+            .unwrap()
+            .dyn_into()
+            .unwrap();
+        let viewport_height = viewport.get_index(3);
+
+        let (x, y, w, h) = (
+            x as i32,
+            viewport_height - (y + h) as i32,
+            w as i32,
+            h as i32,
+        );
+        pipeline.scissors_state = Some(ScissorsState { x, y, w, h });
+
+        gl_call!(gl.enable(Gl::SCISSOR_TEST));
+        gl_call!(gl.scissor(x as i32, y as i32, w as i32, h as i32));
     }
     fn set_vertex_buffer(&mut self, _start_slot: u32, buffer_id: BufferId, _offset: u64) {
         // TODO - start_slot and offset parameters
@@ -115,15 +145,21 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
     }
 
     fn draw_indexed(&mut self, indices: Range<u32>, _base_vertex: i32, instances: Range<u32>) {
+        let (index_type, type_size) = match self.pipeline_descriptor.as_ref().unwrap().index_format
+        {
+            IndexFormat::Uint16 => (Gl::UNSIGNED_SHORT, 2),
+            IndexFormat::Uint32 => (Gl::UNSIGNED_INT, 4),
+        };
+
         let ctx = &self.render_context;
         let gl = &ctx.device.get_context();
         self.setup_vao();
         gl_call!(gl.draw_elements_instanced_with_i32(
             Gl::TRIANGLES,
-            indices.end as i32,
-            Gl::UNSIGNED_INT,
-            indices.start as i32,
-            instances.end as i32,
+            (indices.end - indices.start) as i32,
+            index_type,
+            indices.start as i32 * type_size,
+            (instances.end - instances.start) as i32,
         ));
         let gl_null = None;
         gl_call!(gl.bind_vertex_array(gl_null));
@@ -200,6 +236,12 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
 
     fn set_pipeline(&mut self, pipeline_handle: &Handle<PipelineDescriptor>) {
         self.pipeline = Some(pipeline_handle.as_weak());
+        let pipeline_descriptors = self
+            .render_context
+            .render_resource_context
+            .pipeline_descriptors
+            .read();
+        self.pipeline_descriptor = pipeline_descriptors.get(pipeline_handle).cloned();
 
         let resources = &self.render_context.render_resource_context.resources;
         let programs = resources.programs.read();
@@ -279,5 +321,12 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
         let program = programs.get(&pipeline.shader_stages).unwrap();
 
         gl_call!(gl.use_program(Some(&program.program)));
+
+        if let Some(ScissorsState { x, y, w, h }) = pipeline.scissors_state.clone() {
+            gl_call!(gl.enable(Gl::SCISSOR_TEST));
+            gl_call!(gl.scissor(x, y, w, h));
+        } else {
+            gl_call!(gl.disable(Gl::SCISSOR_TEST));
+        }
     }
 }
