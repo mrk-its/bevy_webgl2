@@ -8,6 +8,7 @@ name = "bevy_webgl2"
 version = "0.4.1"
 repository = "https://github.com/mrk-its/bevy_webgl2"
 readme = "README.md"
+exclude = ["assets/**/*", ".github/**/*", "index.html", "fix_bevy_example.sh", "Makefile.toml"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
