@@ -38,11 +38,15 @@ web-sys = {version = "0.3.45", features = [
   'WebGlProgram',
   'WebGlShader',
   'Window',
+  'WebGlFramebuffer',
   'WebGlTexture',
   'WebGlUniformLocation',
   'WebGlActiveInfo',
   'WebGlVertexArrayObject',
 ]}
+
+[patch.crates-io]
+bevy = {path = "../bevy", default-features=false}
 
 [dev-dependencies]
 compile-time-run = "0.2"
@@ -79,6 +83,10 @@ path = "examples/3d/texture.rs"
 [[example]]
 name = "load_gltf"
 path = "examples/3d/load_gltf.rs"
+
+[[example]]
+name = "render_to_texture"
+path = "examples/3d/render_to_texture.rs"
 
 [[example]]
 name = "parenting"

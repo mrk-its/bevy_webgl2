@@ -117,14 +117,16 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
 
     fn set_viewport(
         &mut self,
-        _x: f32,
-        _y: f32,
-        _w: f32,
-        _h: f32,
+        x: f32,
+        y: f32,
+        w: f32,
+        h: f32,
         _min_depth: f32,
         _max_depth: f32,
     ) {
-        panic!("not implemented");
+        let ctx = &self.render_context;
+        let gl = &ctx.device.get_context();
+        gl_call!(gl.viewport(x as i32, y as i32, w as i32, h as i32));
     }
 
     fn set_stencil_reference(&mut self, _reference: u32) {}

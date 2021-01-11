@@ -26,6 +26,7 @@ pub struct WebGL2RenderResourceContext {
     pub device: Arc<Device>,
     pub resources: WebGL2Resources,
     pub pipeline_descriptors: Arc<RwLock<HashMap<Handle<PipelineDescriptor>, PipelineDescriptor>>>,
+    pub swapchain_texture: TextureId,
     initialized: bool,
 }
 
@@ -42,6 +43,7 @@ impl WebGL2RenderResourceContext {
             resources: WebGL2Resources::default(),
             pipeline_descriptors: Default::default(),
             initialized: false,
+            swapchain_texture: TextureId::new(),
         }
     }
 
@@ -151,7 +153,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         let gl = &self.device.get_context();
 
         let layout = reflect_layout(&*gl, &program);
-        info!("reflected layout: {:#?}", layout);
+        debug!("reflected layout: {:#?}", layout);
         self.resources
             .programs
             .write()
@@ -169,16 +171,20 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
 
     fn create_swap_chain(&self, window: &Window) {
         let gl = &self.device.get_context();
+        let mut window_size = self.resources.window_size.write();
+        *window_size = (window.physical_width(), window.physical_height());
         gl_call!(gl.viewport(
             0,
             0,
-            window.physical_width() as i32,
-            window.physical_height() as i32
+            window_size.0 as i32,
+            window_size.1 as i32,
         ));
     }
 
-    fn next_swap_chain_texture(&self, _window: &Window) -> TextureId {
-        TextureId::new()
+    fn next_swap_chain_texture(&self, window: &Window) -> TextureId {
+        let mut window_size = self.resources.window_size.write();
+        *window_size = (window.physical_width(), window.physical_height());
+        self.swapchain_texture
     }
 
     fn drop_swap_chain_texture(&self, _render_resource: TextureId) {}
@@ -194,6 +200,26 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         self.add_texture_descriptor(texture_id, texture_descriptor);
         let gl = &self.device.get_context();
         let texture = gl_call!(gl.create_texture()).unwrap();
+
+        let size = texture_descriptor.size;
+        info!("create texture: {:#?}", texture_descriptor);
+        gl_call!(gl.bind_texture(Gl::TEXTURE_2D, Some(&texture)));
+        gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
+            Gl::TEXTURE_2D,
+            0,                       //destination_mip_level as i32,
+            Gl::RGBA as i32, // TODO
+            size.width as i32,
+            size.height as i32,
+            0,
+            Gl::RGBA,
+            Gl::UNSIGNED_BYTE,
+            None,
+        ).unwrap();
+        gl_call!(gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_MIN_FILTER, Gl::LINEAR as i32));
+        gl_call!(gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_WRAP_S, Gl::CLAMP_TO_EDGE as i32));
+        gl_call!(gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_WRAP_T, Gl::CLAMP_TO_EDGE as i32));
+        gl_call!(gl.bind_texture(Gl::TEXTURE_2D, None));
+
         self.resources.textures.write().insert(texture_id, texture);
         texture_id
     }

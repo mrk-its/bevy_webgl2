@@ -11,7 +11,7 @@ pub use js_sys;
 pub use wasm_bindgen::JsCast;
 pub use web_sys::{
     WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlShader, WebGlTexture,
-    WebGlUniformLocation, WebGlVertexArrayObject,
+    WebGlUniformLocation, WebGlVertexArrayObject, WebGlFramebuffer,
 };
 
 pub type Gl = WebGl2RenderingContext;

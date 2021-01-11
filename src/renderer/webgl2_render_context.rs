@@ -1,11 +1,8 @@
 use super::{Gl, WebGL2RenderResourceContext};
 
 use crate::{gl_call, Buffer, WebGL2RenderPass};
-use bevy::render::{
-    pass::{LoadOp, Operations, PassDescriptor, RenderPass},
-    renderer::{BufferId, RenderContext, RenderResourceBindings, RenderResourceContext, TextureId},
-    texture::Extent3d,
-};
+use bevy::render::{pass::{LoadOp, Operations, PassDescriptor, RenderPass, TextureAttachment}, renderer::{BufferId, RenderContext, RenderResourceBindings, RenderResourceContext, TextureId}, texture::Extent3d};
+use bevy::utils::tracing::*;
 use std::sync::Arc;
 
 pub struct WebGL2RenderContext {
@@ -176,6 +173,35 @@ impl RenderContext for WebGL2RenderContext {
         let mut clear_mask = 0;
         let gl = &self.device.get_context();
         gl_call!(gl.disable(Gl::SCISSOR_TEST));
+        let swapchain_texture = &self.render_resource_context.swapchain_texture;
+        let t1 = &pass_descriptor.color_attachments[0].attachment;
+        let t2 = &pass_descriptor.color_attachments[0].resolve_target;
+
+        let mut is_swapchain = false;
+        if let TextureAttachment::Id(texture_id) = t1 {
+            is_swapchain = texture_id == swapchain_texture;
+        };
+        if let Some(TextureAttachment::Id(texture_id)) = t2 {
+            is_swapchain = is_swapchain || (texture_id == swapchain_texture);
+        };
+        if is_swapchain {
+            gl.bind_framebuffer(Gl::FRAMEBUFFER, None);
+            let window_size = self.render_resource_context.resources.window_size.read();
+            gl.viewport(0, 0, window_size.0 as i32, window_size.1 as i32);
+        } else if let TextureAttachment::Id(id) = pass_descriptor.color_attachments[0].attachment {
+            if self.render_resource_context.resources.framebuffer.is_none() {
+                self.render_resource_context.resources.framebuffer = gl.create_framebuffer();
+            }
+            let fb = self.render_resource_context.resources.framebuffer.as_ref().unwrap();
+            let textures = self.render_resource_context.resources.textures.read();
+            let texture_info = self.render_resource_context.resources.texture_descriptors.read();
+            let texture_descr = texture_info.get(&id).unwrap();
+            let gl_texture = textures.get(&id);
+            gl.bind_framebuffer(Gl::FRAMEBUFFER, Some(fb));
+            gl.framebuffer_texture_2d(Gl::FRAMEBUFFER, Gl::COLOR_ATTACHMENT0, Gl::TEXTURE_2D, gl_texture, 0);
+            gl.viewport(0, 0, texture_descr.size.width as i32, texture_descr.size.height as i32);
+        }
+
 
         if let LoadOp::Clear(c) = pass_descriptor.color_attachments[0].ops.load {
             gl_call!(gl.clear_color(c.r(), c.g(), c.b(), c.a()));

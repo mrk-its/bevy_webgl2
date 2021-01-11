@@ -2,7 +2,7 @@ use crate::{
     gl_call,
     renderer::{
         gl_vertex_format, WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlShader,
-        WebGlTexture, WebGlVertexArrayObject,
+        WebGlTexture, WebGlVertexArrayObject, WebGlFramebuffer,
     },
 };
 use bevy::asset::{Handle, HandleUntyped};
@@ -158,11 +158,13 @@ impl GlProgram {
 pub struct WebGL2Resources {
     pub binding_point_seq: Arc<RwLock<u32>>,
     pub texture_unit_seq: Arc<RwLock<u32>>,
+    pub window_size: Arc<RwLock<(u32, u32)>>,
     pub programs: Arc<RwLock<HashMap<ShaderStages, GlProgram>>>,
     pub binding_points: Arc<RwLock<HashMap<(u32, u32), u32>>>,
     pub texture_units: Arc<RwLock<HashMap<(u32, u32), u32>>>,
     pub bind_groups: Arc<RwLock<HashMap<BindGroupId, Vec<WebGL2RenderResourceBinding>>>>,
     pub buffers: Arc<RwLock<HashMap<BufferId, GlBufferInfo>>>,
+    pub framebuffer: Option<WebGlFramebuffer>,
     pub texture_descriptors: Arc<RwLock<HashMap<TextureId, TextureDescriptor>>>,
     pub textures: Arc<RwLock<HashMap<TextureId, WebGlTexture>>>,
     pub asset_resources: Arc<RwLock<HashMap<(HandleUntyped, u64), RenderResourceId>>>,
