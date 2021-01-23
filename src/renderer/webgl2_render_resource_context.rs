@@ -10,8 +10,8 @@ use bevy::render::{
         BindGroupDescriptor, BindGroupDescriptorId, BindType, PipelineDescriptor, PipelineLayout,
     },
     renderer::{
-        BindGroup, BufferId, BufferInfo, BufferUsage, RenderResourceBinding, RenderResourceContext,
-        RenderResourceId, SamplerId, TextureId,
+        BindGroup, BufferId, BufferInfo, BufferMapMode, BufferUsage, RenderResourceBinding,
+        RenderResourceContext, RenderResourceId, SamplerId, TextureId,
     },
     shader::{Shader, ShaderError, ShaderSource, ShaderStage, ShaderStages},
     texture::{SamplerDescriptor, TextureDescriptor},
@@ -279,7 +279,16 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         // );
     }
 
-    fn map_buffer(&self, _id: BufferId) {
+    fn read_mapped_buffer(
+        &self,
+        _id: BufferId,
+        _range: Range<u64>,
+        _read: &dyn Fn(&[u8], &dyn RenderResourceContext),
+    ) {
+        unimplemented!();
+    }
+
+    fn map_buffer(&self, _id: BufferId, _mode: BufferMapMode) {
         // info!("map buffer {:?}", _id);
     }
 
