@@ -99,13 +99,10 @@ impl Plugin for WebGL2Plugin {
     }
 }
 
-#[derive(Default)]
-pub struct State {
-    pub window_created_event_reader: EventReader<WindowCreated>,
-}
-
 pub fn webgl2_handle_window_created_events_system() -> impl FnMut(&mut World, &mut Resources) {
-    let mut window_created_event_reader: EventReader<WindowCreated> = Default::default();
+    let events = Events::<WindowCreated>::default();
+    let mut window_created_event_reader = events.get_reader();
+
     move |_, resources| {
         let events = {
             let window_created_events = resources.get::<Events<WindowCreated>>().unwrap();
