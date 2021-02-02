@@ -189,11 +189,13 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
     }
 
     fn create_texture(&self, texture_descriptor: TextureDescriptor) -> TextureId {
+        warn!("create_texture");
         let texture_id = TextureId::new();
         self.add_texture_descriptor(texture_id, texture_descriptor);
         let gl = &self.device.get_context();
         let texture = gl_call!(gl.create_texture()).unwrap();
         self.resources.textures.write().insert(texture_id, texture);
+        warn!("done create_texture");
         texture_id
     }
 
@@ -427,7 +429,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
                         gl_call!(gl.get_uniform_location(&program.program, &binding.name))
                     {
                         info!("found uniform location: {:?}", uniform_location);
-                        if let BindType::SampledTexture { .. } = binding.bind_type {
+                        if let BindType::Texture { .. } = binding.bind_type {
                             let texture_unit = self
                                 .resources
                                 .get_or_create_texture_unit(bind_group.index, binding.index);
@@ -479,9 +481,9 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
             update_vao: false,
             index_buffer: None,
             vertex_buffer: None,
-            color_states: pipeline_descriptor.color_states.clone(),
-            depth_stencil_state: pipeline_descriptor.depth_stencil_state.clone(),
-            rasterization_state: pipeline_descriptor.rasterization_state.clone(),
+            color_target_states: pipeline_descriptor.color_target_states.clone(),
+            depth_stencil: pipeline_descriptor.depth_stencil.clone(),
+            primitive: pipeline_descriptor.primitive.clone(),
             scissors_state: None,
         };
         self.pipeline_descriptors

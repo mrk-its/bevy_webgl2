@@ -4,10 +4,9 @@ use bevy::log::prelude::*;
 use bevy::render::{
     pipeline::{
         BindGroupDescriptor, BindType, BindingDescriptor, BindingShaderStage, InputStepMode,
-        PipelineLayout, UniformProperty, VertexAttributeDescriptor, VertexBufferDescriptor,
-        VertexFormat,
+        PipelineLayout, UniformProperty, VertexAttribute, VertexBufferLayout, VertexFormat,
     },
-    texture::{TextureComponentType, TextureViewDimension},
+    texture::{TextureSampleType, TextureViewDimension},
 };
 use bevy::utils::HashSet;
 use std::iter::Extend;
@@ -114,11 +113,11 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
 
         let format = get_vertex_format(info.type_());
 
-        vertex_buffer_descriptors.push(VertexBufferDescriptor {
+        vertex_buffer_descriptors.push(VertexBufferLayout {
             name: info.name().into(),
             stride: 0,
             step_mode: InputStepMode::Vertex,
-            attributes: vec![VertexAttributeDescriptor {
+            attributes: vec![VertexAttribute {
                 name: info.name().into(),
                 offset: 0,
                 format,
@@ -158,7 +157,7 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
                     name: "Camera".to_string(),
                     index: 0,
                     bind_type: BindType::Uniform {
-                        dynamic: false,
+                        has_dynamic_offset: false,
                         property: UniformProperty::Struct(vec![UniformProperty::Mat4]),
                     },
                     shader_stage: BindingShaderStage::VERTEX | BindingShaderStage::FRAGMENT,
@@ -213,7 +212,7 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
             name,
             index,
             bind_type: BindType::Uniform {
-                dynamic: false,
+                has_dynamic_offset: false,
                 property,
             },
             shader_stage: BindingShaderStage::VERTEX | BindingShaderStage::FRAGMENT,
@@ -248,10 +247,10 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
             let binding = BindingDescriptor {
                 name: info.name(),
                 index: index,
-                bind_type: BindType::SampledTexture {
+                bind_type: BindType::Texture {
                     multisampled: false,
-                    dimension: TextureViewDimension::D2,
-                    component_type: TextureComponentType::Float,
+                    view_dimension: TextureViewDimension::D2,
+                    sample_type: TextureSampleType::Float { filterable: true },
                 },
                 shader_stage: BindingShaderStage::FRAGMENT,
             };

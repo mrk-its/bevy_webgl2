@@ -1,5 +1,6 @@
 use crate::{gl_call, renderer::*, Buffer, ScissorsState};
 use bevy::asset::Handle;
+use bevy::log::prelude::*;
 use bevy::render::{
     pass::RenderPass,
     pipeline::{
@@ -130,8 +131,9 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
 
     fn set_stencil_reference(&mut self, _reference: u32) {}
 
-    fn set_index_buffer(&mut self, buffer_id: BufferId, _offset: u64) {
+    fn set_index_buffer(&mut self, buffer_id: BufferId, _offset: u64, _index_format: IndexFormat) {
         // TODO - offset parameter
+        // TODO - index_format parameter
 
         let resources = &self.render_context.render_resource_context.resources;
         let mut pipelines = resources.pipelines.write();
@@ -145,11 +147,8 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
     }
 
     fn draw_indexed(&mut self, indices: Range<u32>, _base_vertex: i32, instances: Range<u32>) {
-        let (index_type, type_size) = match self.pipeline_descriptor.as_ref().unwrap().index_format
-        {
-            IndexFormat::Uint16 => (Gl::UNSIGNED_SHORT, 2),
-            IndexFormat::Uint32 => (Gl::UNSIGNED_INT, 4),
-        };
+        // TODO hack. need to deal with IndexFormats properly
+        let (index_type, type_size) = (Gl::UNSIGNED_INT, 4);
 
         let ctx = &self.render_context;
         let gl = &ctx.device.get_context();
@@ -250,25 +249,24 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
         let ctx = self.render_context;
         let gl = &ctx.device.get_context();
 
-        if let Some(state) = &pipeline.rasterization_state {
-            match state.cull_mode {
-                CullMode::None => {
-                    // TODO - can we always keep CULL_FACE enabled
-                    // and use cullFace(FRONT_AND_BACK)?
-                    // it seems do not work on contributors example
-                    gl_call!(gl.disable(Gl::CULL_FACE));
-                }
-                CullMode::Front => {
-                    gl_call!(gl.enable(Gl::CULL_FACE));
-                    gl_call!(gl.cull_face(Gl::FRONT));
-                }
-                CullMode::Back => {
-                    gl_call!(gl.enable(Gl::CULL_FACE));
-                    gl_call!(gl.cull_face(Gl::BACK));
-                }
+        match &pipeline.primitive.cull_mode {
+            CullMode::None => {
+                // TODO - can we always keep CULL_FACE enabled
+                // and use cullFace(FRONT_AND_BACK)?
+                // it seems do not work on contributors example
+                gl_call!(gl.disable(Gl::CULL_FACE));
+            }
+            CullMode::Front => {
+                gl_call!(gl.enable(Gl::CULL_FACE));
+                gl_call!(gl.cull_face(Gl::FRONT));
+            }
+            CullMode::Back => {
+                gl_call!(gl.enable(Gl::CULL_FACE));
+                gl_call!(gl.cull_face(Gl::BACK));
             }
         }
-        if let Some(state) = &pipeline.depth_stencil_state {
+
+        if let Some(state) = &pipeline.depth_stencil {
             let depth_func = match state.depth_compare {
                 bevy::render::pipeline::CompareFunction::Never => Gl::NEVER,
                 bevy::render::pipeline::CompareFunction::Less => Gl::LESS,
@@ -282,7 +280,7 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
             gl_call!(gl.depth_func(depth_func));
         }
 
-        if let Some(state) = pipeline.color_states.get(0) {
+        if let Some(state) = pipeline.color_target_states.get(0) {
             gl_call!(gl.enable(Gl::BLEND));
             fn blend_factor(factor: &BlendFactor) -> u32 {
                 match factor {
