@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 fn main() {
     App::build()
-        .add_resource(Msaa { samples: 4 })
+        .insert_resource(Msaa { samples: 4 })
         .add_plugins(bevy_webgl2::DefaultPlugins)
         .add_startup_system(setup.system())
         .run();
@@ -14,6 +14,10 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
+    let mut camera = OrthographicCameraBundle::new_3d();
+    camera.transform = Transform::from_translation(Vec3::new(-2.0, 2.5, 5.0))
+        .looking_at(Vec3::default(), Vec3::unit_y());
+
     // add entities to the world
     commands
         // plane
@@ -35,9 +39,5 @@ fn setup(
             ..Default::default()
         })
         // camera
-        .spawn(Camera3dBundle {
-            transform: Transform::from_translation(Vec3::new(-2.0, 2.5, 5.0))
-                .looking_at(Vec3::default(), Vec3::unit_y()),
-            ..Default::default()
-        });
+        .spawn(camera);
 }

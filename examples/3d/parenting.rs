@@ -4,7 +4,7 @@ use bevy::prelude::*;
 /// are propagated to their descendants
 fn main() {
     App::build()
-        .add_resource(Msaa { samples: 4 })
+        .insert_resource(Msaa { samples: 4 })
         .add_plugins(bevy_webgl2::DefaultPlugins)
         .add_startup_system(setup.system())
         .add_system(rotator_system.system())
@@ -33,6 +33,10 @@ fn setup(
         ..Default::default()
     });
 
+    let mut camera = OrthographicCameraBundle::new_3d();
+    camera.transform = Transform::from_translation(Vec3::new(5.0, 10.0, 10.0))
+        .looking_at(Vec3::default(), Vec3::unit_y());
+
     commands
         // parent cube
         .spawn(PbrBundle {
@@ -57,9 +61,5 @@ fn setup(
             ..Default::default()
         })
         // camera
-        .spawn(Camera3dBundle {
-            transform: Transform::from_translation(Vec3::new(5.0, 10.0, 10.0))
-                .looking_at(Vec3::default(), Vec3::unit_y()),
-            ..Default::default()
-        });
+        .spawn(camera);
 }

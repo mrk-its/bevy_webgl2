@@ -47,12 +47,17 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let cube_handle = meshes.add(Mesh::from(shape::Cube { size: 2.0 }));
+
+    let mut camera = OrthographicCameraBundle::new_3d();
+    camera.transform = Transform::from_translation(Vec3::new(5.0, 10.0, 10.0))
+        .looking_at(Vec3::default(), Vec3::unit_y());
+
     commands
         // parent cube
         .spawn(PbrBundle {
             mesh: cube_handle.clone(),
             material: materials.add(StandardMaterial {
-                shaded: false,
+                unlit: false,
                 ..Default::default()
             }),
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
@@ -65,7 +70,7 @@ fn setup(
                 .spawn(PbrBundle {
                     mesh: cube_handle.clone(),
                     material: materials.add(StandardMaterial {
-                        shaded: false,
+                        unlit: false,
                         ..Default::default()
                     }),
                     transform: Transform::from_translation(Vec3::new(0.0, 3.0, 0.0)),
@@ -74,7 +79,7 @@ fn setup(
                 .spawn(PbrBundle {
                     mesh: cube_handle,
                     material: materials.add(StandardMaterial {
-                        shaded: false,
+                        unlit: false,
                         ..Default::default()
                     }),
                     transform: Transform::from_translation(Vec3::new(0.0, -3.0, 0.0)),
@@ -82,9 +87,5 @@ fn setup(
                 });
         })
         // camera
-        .spawn(Camera3dBundle {
-            transform: Transform::from_translation(Vec3::new(5.0, 10.0, 10.0))
-                .looking_at(Vec3::default(), Vec3::unit_y()),
-            ..Default::default()
-        });
+        .spawn(camera);
 }

@@ -6,7 +6,7 @@ use bevy::{
 /// This example is for debugging text layout
 fn main() {
     App::build()
-        .add_resource(WindowDescriptor {
+        .insert_resource(WindowDescriptor {
             vsync: false,
             ..Default::default()
         })
@@ -21,7 +21,7 @@ struct TextChanges;
 
 fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("fonts/FiraSans-Bold.ttf");
-    commands.spawn(CameraUiBundle::default()).spawn(TextBundle {
+    commands.spawn(UiCameraBundle::default()).spawn(TextBundle {
         style: Style {
             align_self: AlignSelf::FlexEnd,
             position_type: PositionType::Absolute,
@@ -32,18 +32,18 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
             },
             ..Default::default()
         },
-        text: Text {
-            value: "This is\ntext with\nline breaks\nin the top left".to_string(),
-            font: font.clone(),
-            style: TextStyle {
+        text: Text::with_section(
+            "This is\ntext with\nline breaks\nin the top left".to_string(),
+            TextStyle {
+                font: font.clone(),
                 font_size: 50.0,
                 color: Color::WHITE,
-                alignment: TextAlignment::default(),
             },
-        },
+            TextAlignment::default(),
+        ),
         ..Default::default()
     });
-    commands.spawn(CameraUiBundle::default()).spawn(TextBundle {
+    commands.spawn(UiCameraBundle::default()).spawn(TextBundle {
         style: Style {
             align_self: AlignSelf::FlexEnd,
             position_type: PositionType::Absolute,
@@ -58,23 +58,23 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
             },
             ..Default::default()
         },
-        text: Text {
-            value: "This is very long text with limited width in the top right and is also pink"
+        text: Text::with_section(
+            "This is very long text with limited width in the top right and is also pink"
                 .to_string(),
-            font: font.clone(),
-            style: TextStyle {
+            TextStyle {
+                font: font.clone(),
                 font_size: 50.0,
                 color: Color::rgb(0.8, 0.2, 0.7),
-                alignment: TextAlignment {
-                    horizontal: HorizontalAlign::Center,
-                    vertical: VerticalAlign::Center,
-                },
             },
-        },
+            TextAlignment {
+                horizontal: HorizontalAlign::Center,
+                vertical: VerticalAlign::Center,
+            },
+        ),
         ..Default::default()
     });
     commands
-        .spawn(CameraUiBundle::default())
+        .spawn(UiCameraBundle::default())
         .spawn(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
@@ -86,19 +86,19 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
                 },
                 ..Default::default()
             },
-            text: Text {
-                value: "This text changes in the bottom right".to_string(),
-                font: font.clone(),
-                style: TextStyle {
+            text: Text::with_section(
+                "This text changes in the bottom right".to_string(),
+                TextStyle {
+                    font: font.clone(),
                     font_size: 30.0,
                     color: Color::WHITE,
-                    alignment: TextAlignment::default(),
                 },
-            },
+                TextAlignment::default(),
+            ),
             ..Default::default()
         })
         .with(TextChanges);
-    commands.spawn(CameraUiBundle::default()).spawn(TextBundle {
+    commands.spawn(UiCameraBundle::default()).spawn(TextBundle {
         style: Style {
             align_self: AlignSelf::FlexEnd,
             position_type: PositionType::Absolute,
@@ -113,16 +113,15 @@ fn infotext_system(commands: &mut Commands, asset_server: Res<AssetServer>) {
             },
             ..Default::default()
         },
-        text: Text {
-            value: "This\ntext has\nline breaks and also a set width in the bottom left"
-                .to_string(),
-            font,
-            style: TextStyle {
+        text: Text::with_section(
+            "This\ntext has\nline breaks and also a set width in the bottom left".to_string(),
+            TextStyle {
+                font,
                 font_size: 50.0,
                 color: Color::WHITE,
-                alignment: TextAlignment::default(),
             },
-        },
+            TextAlignment::default(),
+        ),
         ..Default::default()
     });
 }
@@ -148,7 +147,7 @@ fn change_text_system(
             }
         }
 
-        text.value = format!(
+        text.sections[0].value = format!(
             "This text changes in the bottom right - {:.1} fps, {:.3} ms/frame",
             fps,
             frame_time * 1000.0,
