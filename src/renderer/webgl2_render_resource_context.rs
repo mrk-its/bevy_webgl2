@@ -189,13 +189,11 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
     }
 
     fn create_texture(&self, texture_descriptor: TextureDescriptor) -> TextureId {
-        warn!("create_texture");
         let texture_id = TextureId::new();
         self.add_texture_descriptor(texture_id, texture_descriptor);
         let gl = &self.device.get_context();
         let texture = gl_call!(gl.create_texture()).unwrap();
         self.resources.textures.write().insert(texture_id, texture);
-        warn!("done create_texture");
         texture_id
     }
 
