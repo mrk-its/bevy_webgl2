@@ -58,14 +58,13 @@ fn setup(
                                     ..Default::default()
                                 },
                                 text: Text::with_section(
-                                    "Text Example".to_string(),
+                                    "Text Example",
                                     TextStyle {
                                         font: asset_server.load("fonts/FiraSans-Bold.ttf"),
                                         font_size: 30.0,
                                         color: Color::WHITE,
-                                        ..Default::default()
                                     },
-                                    TextAlignment::default(),
+                                    Default::default(),
                                 ),
                                 ..Default::default()
                             });
@@ -116,10 +115,6 @@ fn setup(
                         ..Default::default()
                     },
                     material: materials.add(Color::NONE.into()),
-                    visible: Visible {
-                        is_transparent: true,
-                        ..Default::default()
-                    },
                     ..Default::default()
                 })
                 .with_children(|parent| {
@@ -189,10 +184,6 @@ fn setup(
                                         ..Default::default()
                                     },
                                     material: materials.add(Color::rgba(1.0, 0.9, 0.9, 0.4).into()),
-                                    visible: Visible {
-                                        is_transparent: true,
-                                        ..Default::default()
-                                    },
                                     ..Default::default()
                                 });
                         });
@@ -207,10 +198,6 @@ fn setup(
                         ..Default::default()
                     },
                     material: materials.add(Color::NONE.into()),
-                    visible: Visible {
-                        is_transparent: true,
-                        ..Default::default()
-                    },
                     ..Default::default()
                 })
                 .with_children(|parent| {
@@ -222,10 +209,6 @@ fn setup(
                         },
                         material: materials
                             .add(asset_server.load("branding/bevy_logo_dark_big.png").into()),
-                        visible: Visible {
-                            is_transparent: true,
-                            ..Default::default()
-                        },
                         ..Default::default()
                     });
                 });

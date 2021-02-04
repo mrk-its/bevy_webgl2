@@ -47,7 +47,6 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     let cube_handle = meshes.add(Mesh::from(shape::Cube { size: 2.0 }));
-
     commands
         // parent cube
         .spawn(PbrBundle {
@@ -56,7 +55,7 @@ fn setup(
                 unlit: true,
                 ..Default::default()
             }),
-            transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
+            transform: Transform::from_xyz(0.0, 0.0, 1.0),
             ..Default::default()
         })
         .with(Rotator)
@@ -69,7 +68,7 @@ fn setup(
                         unlit: true,
                         ..Default::default()
                     }),
-                    transform: Transform::from_translation(Vec3::new(0.0, 3.0, 0.0)),
+                    transform: Transform::from_xyz(0.0, 3.0, 0.0),
                     ..Default::default()
                 })
                 .spawn(PbrBundle {
@@ -78,13 +77,13 @@ fn setup(
                         unlit: true,
                         ..Default::default()
                     }),
-                    transform: Transform::from_translation(Vec3::new(0.0, -3.0, 0.0)),
+                    transform: Transform::from_xyz(0.0, -3.0, 0.0),
                     ..Default::default()
                 });
         })
         // camera
         .spawn(PerspectiveCameraBundle {
-            transform: Transform::from_translation(Vec3::new(5.0, 10.0, 10.0))
+            transform: Transform::from_xyz(5.0, 10.0, 10.0)
                 .looking_at(Vec3::default(), Vec3::unit_y()),
             ..Default::default()
         });

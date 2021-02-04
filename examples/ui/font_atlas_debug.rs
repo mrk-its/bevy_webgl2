@@ -1,9 +1,11 @@
 use bevy::{prelude::*, text::FontAtlasSet};
 
+// TODO: This is now broken. See #1243
 /// This example illustrates how FontAtlases are populated. Bevy uses FontAtlases under the hood to optimize text rendering.
 fn main() {
     App::build()
         .init_resource::<State>()
+        .insert_resource(ClearColor(Color::BLACK))
         .add_plugins(bevy_webgl2::DefaultPlugins)
         .add_startup_system(setup.system())
         .add_system(text_update_system.system())
@@ -66,7 +68,7 @@ fn text_update_system(mut state: ResMut<State>, time: Res<Time>, mut query: Quer
         for mut text in query.iter_mut() {
             let c = rand::random::<u8>() as char;
             if !text.sections[0].value.contains(c) {
-                text.sections[0].value = format!("{}{}", text.sections[0].value, c);
+                text.sections[0].value.push(c);
             }
         }
 
@@ -79,14 +81,13 @@ fn setup(commands: &mut Commands, asset_server: Res<AssetServer>, mut state: Res
     state.handle = font_handle.clone();
     commands.spawn(UiCameraBundle::default()).spawn(TextBundle {
         text: Text::with_section(
-            "a".to_string(),
+            "a",
             TextStyle {
                 font: font_handle,
                 font_size: 60.0,
-                color: Color::WHITE,
-                ..Default::default()
+                color: Color::YELLOW,
             },
-            TextAlignment::default(),
+            Default::default(),
         ),
         ..Default::default()
     });

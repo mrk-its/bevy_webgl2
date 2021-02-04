@@ -49,7 +49,7 @@ fn setup(
         // paddle
         .spawn(SpriteBundle {
             material: materials.add(Color::rgb(0.5, 0.5, 1.0).into()),
-            transform: Transform::from_translation(Vec3::new(0.0, -215.0, 0.0)),
+            transform: Transform::from_xyz(0.0, -215.0, 0.0),
             sprite: Sprite::new(Vec2::new(120.0, 30.0)),
             ..Default::default()
         })
@@ -58,7 +58,7 @@ fn setup(
         // ball
         .spawn(SpriteBundle {
             material: materials.add(Color::rgb(1.0, 0.5, 0.5).into()),
-            transform: Transform::from_translation(Vec3::new(0.0, -50.0, 1.0)),
+            transform: Transform::from_xyz(0.0, -50.0, 1.0),
             sprite: Sprite::new(Vec2::new(30.0, 30.0)),
             ..Default::default()
         })
@@ -67,16 +67,27 @@ fn setup(
         })
         // scoreboard
         .spawn(TextBundle {
-            text: Text::with_section(
-                "Score:".to_string(),
-                TextStyle {
-                    font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                    color: Color::rgb(0.5, 0.5, 1.0),
-                    font_size: 40.0,
-                    ..Default::default()
-                },
-                TextAlignment::default(),
-            ),
+            text: Text {
+                sections: vec![
+                    TextSection {
+                        value: "Score: ".to_string(),
+                        style: TextStyle {
+                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                            font_size: 40.0,
+                            color: Color::rgb(0.5, 0.5, 1.0),
+                        },
+                    },
+                    TextSection {
+                        value: "".to_string(),
+                        style: TextStyle {
+                            font: asset_server.load("fonts/FiraMono-Medium.ttf"),
+                            font_size: 40.0,
+                            color: Color::rgb(1.0, 0.5, 0.5),
+                        },
+                    },
+                ],
+                ..Default::default()
+            },
             style: Style {
                 position_type: PositionType::Absolute,
                 position: Rect {
@@ -98,7 +109,7 @@ fn setup(
         // left
         .spawn(SpriteBundle {
             material: wall_material.clone(),
-            transform: Transform::from_translation(Vec3::new(-bounds.x / 2.0, 0.0, 0.0)),
+            transform: Transform::from_xyz(-bounds.x / 2.0, 0.0, 0.0),
             sprite: Sprite::new(Vec2::new(wall_thickness, bounds.y + wall_thickness)),
             ..Default::default()
         })
@@ -106,7 +117,7 @@ fn setup(
         // right
         .spawn(SpriteBundle {
             material: wall_material.clone(),
-            transform: Transform::from_translation(Vec3::new(bounds.x / 2.0, 0.0, 0.0)),
+            transform: Transform::from_xyz(bounds.x / 2.0, 0.0, 0.0),
             sprite: Sprite::new(Vec2::new(wall_thickness, bounds.y + wall_thickness)),
             ..Default::default()
         })
@@ -114,7 +125,7 @@ fn setup(
         // bottom
         .spawn(SpriteBundle {
             material: wall_material.clone(),
-            transform: Transform::from_translation(Vec3::new(0.0, -bounds.y / 2.0, 0.0)),
+            transform: Transform::from_xyz(0.0, -bounds.y / 2.0, 0.0),
             sprite: Sprite::new(Vec2::new(bounds.x + wall_thickness, wall_thickness)),
             ..Default::default()
         })
@@ -122,7 +133,7 @@ fn setup(
         // top
         .spawn(SpriteBundle {
             material: wall_material,
-            transform: Transform::from_translation(Vec3::new(0.0, bounds.y / 2.0, 0.0)),
+            transform: Transform::from_xyz(0.0, bounds.y / 2.0, 0.0),
             sprite: Sprite::new(Vec2::new(bounds.x + wall_thickness, wall_thickness)),
             ..Default::default()
         })
@@ -192,7 +203,7 @@ fn ball_movement_system(time: Res<Time>, mut ball_query: Query<(&Ball, &mut Tran
 
 fn scoreboard_system(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>) {
     for mut text in query.iter_mut() {
-        text.sections[0].value = format!("Score: {}", scoreboard.score);
+        text.sections[1].value = scoreboard.score.to_string();
     }
 }
 
