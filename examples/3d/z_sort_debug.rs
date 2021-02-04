@@ -57,7 +57,7 @@ fn setup(
         .spawn(PbrBundle {
             mesh: cube_handle.clone(),
             material: materials.add(StandardMaterial {
-                unlit: false,
+                unlit: true,
                 ..Default::default()
             }),
             transform: Transform::from_translation(Vec3::new(0.0, 0.0, 1.0)),
@@ -70,7 +70,7 @@ fn setup(
                 .spawn(PbrBundle {
                     mesh: cube_handle.clone(),
                     material: materials.add(StandardMaterial {
-                        unlit: false,
+                        unlit: true,
                         ..Default::default()
                     }),
                     transform: Transform::from_translation(Vec3::new(0.0, 3.0, 0.0)),
@@ -79,7 +79,7 @@ fn setup(
                 .spawn(PbrBundle {
                     mesh: cube_handle,
                     material: materials.add(StandardMaterial {
-                        unlit: false,
+                        unlit: true,
                         ..Default::default()
                     }),
                     transform: Transform::from_translation(Vec3::new(0.0, -3.0, 0.0)),
