@@ -48,10 +48,6 @@ fn setup(
 ) {
     let cube_handle = meshes.add(Mesh::from(shape::Cube { size: 2.0 }));
 
-    let mut camera = OrthographicCameraBundle::new_3d();
-    camera.transform = Transform::from_translation(Vec3::new(5.0, 10.0, 10.0))
-        .looking_at(Vec3::default(), Vec3::unit_y());
-
     commands
         // parent cube
         .spawn(PbrBundle {
@@ -87,5 +83,9 @@ fn setup(
                 });
         })
         // camera
-        .spawn(camera);
+        .spawn(PerspectiveCameraBundle {
+            transform: Transform::from_translation(Vec3::new(5.0, 10.0, 10.0))
+                .looking_at(Vec3::default(), Vec3::unit_y()),
+            ..Default::default()
+        });
 }

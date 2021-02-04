@@ -137,10 +137,6 @@ fn setup(
         ]),
     );
 
-    let mut camera = OrthographicCameraBundle::new_3d();
-    camera.transform = Transform::from_translation(Vec3::new(3.0, 5.0, -8.0))
-        .looking_at(Vec3::default(), Vec3::unit_y());
-
     // Setup our world
     commands
         // cube
@@ -154,5 +150,9 @@ fn setup(
         })
         .with(material)
         // camera
-        .spawn(camera);
+        .spawn(PerspectiveCameraBundle {
+            transform: Transform::from_translation(Vec3::new(3.0, 5.0, -8.0))
+                .looking_at(Vec3::default(), Vec3::unit_y()),
+            ..Default::default()
+        });
 }

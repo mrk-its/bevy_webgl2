@@ -113,10 +113,6 @@ fn setup(
     // Create a cube mesh which will use our materials
     let cube_handle = meshes.add(Mesh::from(shape::Cube { size: 2.0 }));
 
-    let mut camera = OrthographicCameraBundle::new_3d();
-    camera.transform = Transform::from_translation(Vec3::new(3.0, 5.0, -8.0))
-        .looking_at(Vec3::default(), Vec3::unit_y());
-
     commands
         // cube
         .spawn(MeshBundle {
@@ -139,5 +135,9 @@ fn setup(
         })
         .with(blue_material)
         // camera
-        .spawn(camera);
+        .spawn(PerspectiveCameraBundle {
+            transform: Transform::from_translation(Vec3::new(3.0, 5.0, -8.0))
+                .looking_at(Vec3::default(), Vec3::unit_y()),
+            ..Default::default()
+        });
 }

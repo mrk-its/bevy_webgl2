@@ -14,10 +14,6 @@ fn setup(
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
-    let mut camera = OrthographicCameraBundle::new_3d();
-    camera.transform = Transform::from_translation(Vec3::new(-2.0, 2.5, 5.0))
-        .looking_at(Vec3::default(), Vec3::unit_y());
-
     // add entities to the world
     commands
         // plane
@@ -39,5 +35,9 @@ fn setup(
             ..Default::default()
         })
         // camera
-        .spawn(camera);
+        .spawn(PerspectiveCameraBundle {
+            transform: Transform::from_translation(Vec3::new(-2.0, 2.5, 5.0))
+                .looking_at(Vec3::default(), Vec3::unit_y()),
+            ..Default::default()
+        });
 }
