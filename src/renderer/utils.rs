@@ -89,6 +89,13 @@ fn get_vertex_format(gl_type: u32) -> VertexFormat {
         Gl::FLOAT_VEC3 => VertexFormat::Float3,
         Gl::FLOAT_VEC4 => VertexFormat::Float4,
         Gl::INT => VertexFormat::Int,
+        Gl::INT_VEC2 => VertexFormat::Int2,
+        Gl::INT_VEC3 => VertexFormat::Int3,
+        Gl::INT_VEC4 => VertexFormat::Int4,
+        Gl::UNSIGNED_INT => VertexFormat::Uint,
+        Gl::UNSIGNED_INT_VEC2 => VertexFormat::Uint2,
+        Gl::UNSIGNED_INT_VEC3 => VertexFormat::Uint3,
+        Gl::UNSIGNED_INT_VEC4 => VertexFormat::Uint4,
         _ => panic!("unknown vertex attribute type: {:?}", gl_type),
     }
 }
@@ -236,7 +243,7 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
             .unwrap();
         let name = info.name();
 
-        if info.type_() == Gl::SAMPLER_2D {
+        if [Gl::SAMPLER_2D, Gl::UNSIGNED_INT_SAMPLER_2D, Gl::INT_SAMPLER_2D].contains(&info.type_()) {
             let (group_index, index) =
                 if let Some((group_index, index)) = program.bind_groups.get(&name) {
                     (*group_index, *index)
