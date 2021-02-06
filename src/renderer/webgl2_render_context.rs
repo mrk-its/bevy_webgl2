@@ -114,7 +114,6 @@ impl RenderContext for WebGL2RenderContext {
             )
         )
         .expect("tex image");
-        gl_call!(gl.generate_mipmap(Gl::TEXTURE_2D));
 
         gl_call!(gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_MIN_FILTER, Gl::NEAREST as i32));
         gl_call!(gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_MAG_FILTER, Gl::NEAREST as i32));
