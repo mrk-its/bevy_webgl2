@@ -1,7 +1,7 @@
 use super::{compile_shader, link_program, reflect_layout, Gl};
 use crate::{
-    gl_call, Buffer, Device, GlBufferInfo, GlShader, GlVertexBufferDescripror, WebGL2Pipeline,
-    WebGL2RenderResourceBinding, WebGL2Resources,
+    converters::*, gl_call, Buffer, Device, GlBufferInfo, GlShader, GlVertexBufferDescripror,
+    WebGL2Pipeline, WebGL2RenderResourceBinding, WebGL2Resources,
 };
 use bevy::asset::{Assets, Handle, HandleUntyped};
 use bevy::log::prelude::*;
@@ -11,7 +11,7 @@ use bevy::render::{
         PipelineLayout,
     },
     renderer::{
-        BindGroup, BufferId, BufferInfo, BufferMapMode, BufferUsage, RenderResourceBinding,
+        BindGroup, BufferId, BufferInfo, RenderResourceBinding,
         RenderResourceContext, RenderResourceId, SamplerId, TextureId,
     },
     shader::{Shader, ShaderError, ShaderSource, ShaderStage, ShaderStages},
@@ -89,10 +89,11 @@ impl WebGL2RenderResourceContext {
 
         let size = winit_window.inner_size();
         let ctx_options = js_sys::Object::new();
-        #[allow(unused_unsafe)]
-        unsafe {
-            js_sys::Reflect::set(&ctx_options, &"alpha".into(), &false.into()).unwrap();
-        }
+        // TODO - test performance for alpha disabled / enabled
+        // #[allow(unused_unsafe)]
+        // unsafe {
+        //     js_sys::Reflect::set(&ctx_options, &"alpha".into(), &false.into()).unwrap();
+        // }
         let gl = winit_window
             .canvas()
             .get_context_with_context_options("webgl2", &ctx_options)
@@ -173,12 +174,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         let gl = &self.device.get_context();
         let mut window_size = self.resources.window_size.write();
         *window_size = (window.physical_width(), window.physical_height());
-        gl_call!(gl.viewport(
-            0,
-            0,
-            window_size.0 as i32,
-            window_size.1 as i32,
-        ));
+        gl_call!(gl.viewport(0, 0, window_size.0 as i32, window_size.1 as i32,));
     }
 
     fn next_swap_chain_texture(&self, window: &Window) -> TextureId {
@@ -202,23 +198,31 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         let texture = gl_call!(gl.create_texture()).unwrap();
 
         let size = texture_descriptor.size;
-        info!("create texture: {:#?}", texture_descriptor);
         gl_call!(gl.bind_texture(Gl::TEXTURE_2D, Some(&texture)));
-        gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
-            Gl::TEXTURE_2D,
-            0,                       //destination_mip_level as i32,
-            Gl::RGBA as i32, // TODO
-            size.width as i32,
-            size.height as i32,
-            0,
-            Gl::RGBA,
-            Gl::UNSIGNED_BYTE,
-            None,
-        ).unwrap();
+
+        let (internal_format, format, _type) = texture_descriptor.format.webgl2_into();
+
+        gl_call!(
+            gl.tex_image_2d_with_i32_and_i32_and_i32_and_format_and_type_and_opt_u8_array(
+                Gl::TEXTURE_2D,
+                0, //destination_mip_level as i32,
+                internal_format as i32,
+                size.width as i32,
+                size.height as i32,
+                0,
+                format,
+                _type,
+                None as Option<&[u8]>,
+            )
+        )
+        .unwrap();
         gl_call!(gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_MIN_FILTER, Gl::LINEAR as i32));
         gl_call!(gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_WRAP_S, Gl::CLAMP_TO_EDGE as i32));
         gl_call!(gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_WRAP_T, Gl::CLAMP_TO_EDGE as i32));
-        gl_call!(gl.bind_texture(Gl::TEXTURE_2D, None));
+        gl_call!(gl.bind_texture(
+            Gl::TEXTURE_2D,
+            None as Option<&crate::renderer::WebGlTexture>,
+        ));
 
         self.resources.textures.write().insert(texture_id, texture);
         texture_id
@@ -252,7 +256,12 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
                 .ok_or("failed to create_buffer")
                 .unwrap();
             gl_call!(gl.bind_buffer(Gl::UNIFORM_BUFFER, Some(&id)));
-            gl_call!(gl.buffer_data_with_i32(Gl::UNIFORM_BUFFER, size as i32, Gl::DYNAMIC_DRAW,));
+            let type_ = if info.buffer_usage.contains(BufferUsage::COPY_DST|BufferUsage::INDIRECT) {
+                Gl::STREAM_READ
+            } else {
+                Gl::DYNAMIC_DRAW
+            };
+            gl_call!(gl.buffer_data_with_i32(Gl::UNIFORM_BUFFER, size as i32, type_));
             Buffer::WebGlBuffer(id)
         };
         let gl_buffer_info = GlBufferInfo { buffer, info };
@@ -321,6 +330,19 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
 
     fn unmap_buffer(&self, _id: BufferId) {
         // info!("unmap buffer {:?}", _id);
+    }
+    fn read_buffer(&self, id: BufferId, data: &mut [u8]) {
+        let mut buffers = self.resources.buffers.write();
+        let info = buffers.get_mut(&id).unwrap();
+        if let Buffer::WebGlBuffer(buffer_id) = &info.buffer {
+            let gl = &self.device.get_context();
+            gl.bind_buffer(Gl::PIXEL_PACK_BUFFER, Some(buffer_id));
+            gl.get_buffer_sub_data_with_i32_and_u8_array(
+                Gl::PIXEL_PACK_BUFFER,
+                0,
+                data,
+            )
+        }
     }
 
     fn create_buffer_with_data(&self, info: BufferInfo, data: &[u8]) -> BufferId {

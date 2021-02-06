@@ -164,7 +164,6 @@ pub struct WebGL2Resources {
     pub texture_units: Arc<RwLock<HashMap<(u32, u32), u32>>>,
     pub bind_groups: Arc<RwLock<HashMap<BindGroupId, Vec<WebGL2RenderResourceBinding>>>>,
     pub buffers: Arc<RwLock<HashMap<BufferId, GlBufferInfo>>>,
-    pub framebuffer: Option<WebGlFramebuffer>,
     pub texture_descriptors: Arc<RwLock<HashMap<TextureId, TextureDescriptor>>>,
     pub textures: Arc<RwLock<HashMap<TextureId, WebGlTexture>>>,
     pub asset_resources: Arc<RwLock<HashMap<(HandleUntyped, u64), RenderResourceId>>>,
@@ -172,6 +171,7 @@ pub struct WebGL2Resources {
     pub pipelines: Arc<RwLock<HashMap<Handle<PipelineDescriptor>, WebGL2Pipeline>>>,
     pub short_buffer_id_seq: Arc<RwLock<u32>>,
     pub short_buffer_ids: Arc<RwLock<HashMap<BufferId, u32>>>,
+    pub framebuffers: Arc<RwLock<HashMap<TextureId, WebGlFramebuffer>>>,
 }
 
 impl WebGL2Resources {

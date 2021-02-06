@@ -1,5 +1,4 @@
 use crate::{gl_call, renderer::*, Buffer, ScissorsState};
-use bevy::asset::Handle;
 use bevy::render::{
     pass::RenderPass,
     pipeline::{
@@ -8,6 +7,7 @@ use bevy::render::{
     },
     renderer::{BindGroupId, BufferId, BufferUsage, RenderContext},
 };
+use bevy::{asset::Handle, render::pipeline::PrimitiveTopology};
 use std::ops::Range;
 
 pub struct WebGL2RenderPass<'a> {
@@ -55,14 +55,26 @@ impl<'a> WebGL2RenderPass<'a> {
         for attr_descr in vertex_buffer_descriptor.attributes.iter() {
             if attr_descr.attrib_location >= 0 {
                 gl_call!(gl.enable_vertex_attrib_array(attr_descr.attrib_location as u32 as u32));
-                gl_call!(gl.vertex_attrib_pointer_with_i32(
-                    attr_descr.attrib_location as u32,
-                    attr_descr.format.nr_of_components,
-                    attr_descr.format.format,
-                    attr_descr.format.normalized,
-                    vertex_buffer_descriptor.stride,
-                    attr_descr.offset,
-                ));
+                if attr_descr.format.format == Gl::FLOAT
+                    || attr_descr.format.format == Gl::HALF_FLOAT
+                {
+                    gl_call!(gl.vertex_attrib_pointer_with_i32(
+                        attr_descr.attrib_location as u32,
+                        attr_descr.format.nr_of_components,
+                        attr_descr.format.format,
+                        attr_descr.format.normalized,
+                        vertex_buffer_descriptor.stride,
+                        attr_descr.offset,
+                    ));
+                } else {
+                    gl_call!(gl.vertex_attrib_i_pointer_with_i32(
+                        attr_descr.attrib_location as u32,
+                        attr_descr.format.nr_of_components,
+                        attr_descr.format.format,
+                        vertex_buffer_descriptor.stride,
+                        attr_descr.offset,
+                    ));
+                }
             }
         }
     }
@@ -115,15 +127,7 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
         }
     }
 
-    fn set_viewport(
-        &mut self,
-        x: f32,
-        y: f32,
-        w: f32,
-        h: f32,
-        _min_depth: f32,
-        _max_depth: f32,
-    ) {
+    fn set_viewport(&mut self, x: f32, y: f32, w: f32, h: f32, _min_depth: f32, _max_depth: f32) {
         let ctx = &self.render_context;
         let gl = &ctx.device.get_context();
         gl_call!(gl.viewport(x as i32, y as i32, w as i32, h as i32));
@@ -150,23 +154,31 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
     fn draw_indexed(&mut self, indices: Range<u32>, _base_vertex: i32, instances: Range<u32>) {
         // mysterious "Parking not supported on this platform" panic if you let this code
         // out of its block.
-        let (index_type, type_size) = {
+        let (primitives, (index_type, type_size)) = {
             let resources = &self.render_context.render_resource_context.resources;
             let pipelines = resources.pipelines.read();
             let pipeline_handle = self.pipeline.as_ref().unwrap();
             let pipeline = pipelines.get(&pipeline_handle).unwrap();
 
-            match pipeline.index_format {
+            let primitives = match pipeline.primitive.topology {
+                PrimitiveTopology::PointList => Gl::POINTS,
+                PrimitiveTopology::LineList => Gl::LINES,
+                PrimitiveTopology::LineStrip => Gl::LINE_STRIP,
+                PrimitiveTopology::TriangleList => Gl::TRIANGLES,
+                PrimitiveTopology::TriangleStrip => Gl::TRIANGLE_STRIP,
+            };
+
+            (primitives, match pipeline.index_format {
                 IndexFormat::Uint16 => (Gl::UNSIGNED_SHORT, 2),
                 IndexFormat::Uint32 => (Gl::UNSIGNED_INT, 4),
-            }
+            })
         };
 
         let ctx = &self.render_context;
         let gl = &ctx.device.get_context();
         self.setup_vao();
         gl_call!(gl.draw_elements_instanced_with_i32(
-            Gl::TRIANGLES,
+            primitives,
             (indices.end - indices.start) as i32,
             index_type,
             indices.start as i32 * type_size,
@@ -177,11 +189,22 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
     }
 
     fn draw(&mut self, vertices: Range<u32>, _instances: Range<u32>) {
+        let resources = &self.render_context.render_resource_context.resources;
+        let pipelines = resources.pipelines.read();
+        let pipeline_handle = self.pipeline.as_ref().unwrap();
+        let pipeline = pipelines.get(&pipeline_handle).unwrap();
         let ctx = &self.render_context;
         let gl = &ctx.device.get_context();
         self.setup_vao();
+        let primitives = match pipeline.primitive.topology {
+            PrimitiveTopology::PointList => Gl::POINTS,
+            PrimitiveTopology::LineList => Gl::LINES,
+            PrimitiveTopology::LineStrip => Gl::LINE_STRIP,
+            PrimitiveTopology::TriangleList => Gl::TRIANGLES,
+            PrimitiveTopology::TriangleStrip => Gl::TRIANGLE_STRIP,
+        };
         gl_call!(gl.draw_arrays(
-            Gl::TRIANGLES,
+            primitives,
             vertices.start as i32,
             (vertices.end - vertices.start) as i32
         ));

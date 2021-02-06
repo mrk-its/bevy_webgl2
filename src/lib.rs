@@ -1,5 +1,6 @@
 mod default_plugins;
 pub mod renderer;
+pub mod converters;
 mod webgl2_render_pass;
 mod webgl2_renderer;
 mod webgl2_resources;
