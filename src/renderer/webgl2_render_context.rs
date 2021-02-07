@@ -194,7 +194,6 @@ impl RenderContext for WebGL2RenderContext {
         }
         let mut render_pass = WebGL2RenderPass {
             render_context: self,
-            pipeline_descriptor: None,
             pipeline: None,
         };
         run_pass(&mut render_pass);

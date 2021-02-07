@@ -12,7 +12,6 @@ use std::ops::Range;
 
 pub struct WebGL2RenderPass<'a> {
     pub render_context: &'a WebGL2RenderContext,
-    pub pipeline_descriptor: Option<PipelineDescriptor>,
     pub pipeline: Option<Handle<PipelineDescriptor>>,
 }
 
@@ -130,7 +129,7 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
 
     fn set_stencil_reference(&mut self, _reference: u32) {}
 
-    fn set_index_buffer(&mut self, buffer_id: BufferId, _offset: u64, _index_format: IndexFormat) {
+    fn set_index_buffer(&mut self, buffer_id: BufferId, _offset: u64, index_format: IndexFormat) {
         // TODO - offset parameter
         // TODO - index_format parameter
 
@@ -141,13 +140,25 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
 
         if pipeline.index_buffer != Some(buffer_id) {
             pipeline.index_buffer = Some(buffer_id);
+            pipeline.index_format = index_format;
             pipeline.update_vao = true;
         }
     }
 
     fn draw_indexed(&mut self, indices: Range<u32>, _base_vertex: i32, instances: Range<u32>) {
-        // TODO hack. need to deal with IndexFormats properly
-        let (index_type, type_size) = (Gl::UNSIGNED_INT, 4);
+        // mysterious "Parking not supported on this platform" panic if you let this code
+        // out of its block.
+        let (index_type, type_size) = {
+            let resources = &self.render_context.render_resource_context.resources;
+            let pipelines = resources.pipelines.read();
+            let pipeline_handle = self.pipeline.as_ref().unwrap();
+            let pipeline = pipelines.get(&pipeline_handle).unwrap();
+
+            match pipeline.index_format {
+                IndexFormat::Uint16 => (Gl::UNSIGNED_SHORT, 2),
+                IndexFormat::Uint32 => (Gl::UNSIGNED_INT, 4),
+            }
+        };
 
         let ctx = &self.render_context;
         let gl = &ctx.device.get_context();
@@ -234,12 +245,6 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
 
     fn set_pipeline(&mut self, pipeline_handle: &Handle<PipelineDescriptor>) {
         self.pipeline = Some(pipeline_handle.as_weak());
-        let pipeline_descriptors = self
-            .render_context
-            .render_resource_context
-            .pipeline_descriptors
-            .read();
-        self.pipeline_descriptor = pipeline_descriptors.get(pipeline_handle).cloned();
 
         let resources = &self.render_context.render_resource_context.resources;
         let programs = resources.programs.read();

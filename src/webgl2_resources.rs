@@ -9,7 +9,8 @@ use bevy::asset::{Handle, HandleUntyped};
 use bevy::render::{
     pipeline::{
         BindGroupDescriptor, BindGroupDescriptorId, ColorTargetState, DepthStencilState,
-        InputStepMode, PipelineDescriptor, PrimitiveState, VertexAttribute, VertexBufferLayout,
+        IndexFormat, InputStepMode, PipelineDescriptor, PrimitiveState, VertexAttribute,
+        VertexBufferLayout,
     },
     renderer::{BindGroupId, BufferId, BufferInfo, RenderResourceId, SamplerId, TextureId},
     shader::ShaderStages,
@@ -81,6 +82,7 @@ pub struct WebGL2Pipeline {
     pub vao: WebGlVertexArrayObject,
     pub vertex_buffer: Option<BufferId>,
     pub index_buffer: Option<BufferId>,
+    pub index_format: IndexFormat,
     pub update_vao: bool,
     pub color_target_states: Vec<ColorTargetState>,
     pub depth_stencil: Option<DepthStencilState>,

@@ -7,7 +7,8 @@ use bevy::asset::{Assets, Handle, HandleUntyped};
 use bevy::log::prelude::*;
 use bevy::render::{
     pipeline::{
-        BindGroupDescriptor, BindGroupDescriptorId, BindType, PipelineDescriptor, PipelineLayout,
+        BindGroupDescriptor, BindGroupDescriptorId, BindType, IndexFormat, PipelineDescriptor,
+        PipelineLayout,
     },
     renderer::{
         BindGroup, BufferId, BufferInfo, BufferMapMode, BufferUsage, RenderResourceBinding,
@@ -478,6 +479,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
             vao,
             update_vao: false,
             index_buffer: None,
+            index_format: IndexFormat::Uint32,
             vertex_buffer: None,
             color_target_states: pipeline_descriptor.color_target_states.clone(),
             depth_stencil: pipeline_descriptor.depth_stencil.clone(),
