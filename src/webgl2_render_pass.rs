@@ -1,6 +1,5 @@
 use crate::{gl_call, renderer::*, Buffer, ScissorsState};
 use bevy::asset::Handle;
-use bevy::log::prelude::*;
 use bevy::render::{
     pass::RenderPass,
     pipeline::{

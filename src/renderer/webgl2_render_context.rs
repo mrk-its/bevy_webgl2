@@ -135,26 +135,26 @@ impl RenderContext for WebGL2RenderContext {
 
     fn copy_texture_to_buffer(
         &mut self,
-        source_texture: TextureId,
-        source_origin: [u32; 3],
-        source_mip_level: u32,
-        destination_buffer: BufferId,
-        destination_offset: u64,
-        destination_bytes_per_row: u32,
-        size: Extent3d,
+        _source_texture: TextureId,
+        _source_origin: [u32; 3],
+        _source_mip_level: u32,
+        _destination_buffer: BufferId,
+        _destination_offset: u64,
+        _destination_bytes_per_row: u32,
+        _size: Extent3d,
     ) {
         unimplemented!()
     }
 
     fn copy_texture_to_texture(
         &mut self,
-        source_texture: TextureId,
-        source_origin: [u32; 3],
-        source_mip_level: u32,
-        destination_texture: TextureId,
-        destination_origin: [u32; 3],
-        destination_mip_level: u32,
-        size: Extent3d,
+        _source_texture: TextureId,
+        _source_origin: [u32; 3],
+        _source_mip_level: u32,
+        _destination_texture: TextureId,
+        _destination_origin: [u32; 3],
+        _destination_mip_level: u32,
+        _size: Extent3d,
     ) {
         unimplemented!()
     }
