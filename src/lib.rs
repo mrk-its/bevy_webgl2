@@ -90,8 +90,11 @@ impl Plugin for WebGL2Plugin {
             "webgl2_pre_render_resource",
             SystemStage::parallel(),
         )
-        .add_system_to_stage("webgl2_pre_render_resource", handle_events_system.system())
-        .add_system_to_stage(RENDER, render_system.system())
+        .add_system_to_stage(
+            "webgl2_pre_render_resource",
+            handle_events_system.exclusive_system(),
+        )
+        .add_system_to_stage(RENDER, render_system.exclusive_system())
         .add_system_to_stage(
             bevy::render::stage::POST_RENDER,
             shared_buffers_update_system.system(),
