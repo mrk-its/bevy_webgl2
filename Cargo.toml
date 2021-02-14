@@ -47,6 +47,7 @@ web-sys = {version = "0.3.45", features = [
 [dev-dependencies]
 compile-time-run = "0.2"
 rand = "0.7"
+getrandom = {version="0.1", features=["wasm-bindgen"]}
 
 [profile.release]
 opt-level = 's'
