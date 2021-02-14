@@ -1,9 +1,9 @@
 [env]
 ENV_DIR = {source="${CARGO_MAKE_PROFILE}", default_value = "debug", mapping = {release = "release"}}
+CARGO_TARGET_DIR = {value = "target", condition = {env_not_set = ["CARGO_TARGET_DIR"]}}
+TARGET_DIR = "target"
 CARGO_WASM_EXAMPLE_PATH = "${CARGO_TARGET_DIR}/wasm32-unknown-unknown/${ENV_DIR}/examples/${CARGO_MAKE_TASK_ARGS}.wasm"
 CARGO_PROFILE = "dev"
-CARGO_TARGET_DIR = {source = "${CARGO_TARGET_DIR}", default_value = "target"}
-TARGET_DIR = "target"
 CARGO_MANIFEST_DIR = "${CARGO_MAKE_WORKING_DIRECTORY}"
 ARG1 = "${@}"
 
