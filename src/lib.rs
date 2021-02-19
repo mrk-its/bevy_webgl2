@@ -14,13 +14,13 @@ pub use webgl2_resources::*;
 
 use bevy::asset::{Assets, HandleUntyped};
 use bevy::ecs::prelude::*;
-use bevy::ecs::{Resources, SystemStage, World};
+use bevy::ecs::{Resources, StageLabel, SystemStage, World};
 use bevy::reflect::TypeUuid;
 use bevy::render::{
     pipeline::PipelineDescriptor,
     renderer::{shared_buffers_update_system, RenderResourceContext, SharedBuffers},
     shader::{Shader, ShaderStage},
-    stage::{RENDER, RENDER_RESOURCE},
+    RenderStage,
 };
 
 pub const SPRITE_PIPELINE_HANDLE: HandleUntyped =
@@ -34,6 +34,10 @@ pub const FORWARD_PIPELINE_HANDLE: HandleUntyped =
 
 pub const UI_PIPELINE_HANDLE: HandleUntyped =
     HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 3234320022263993878);
+#[derive(Debug, Hash, PartialEq, Eq, Clone, StageLabel)]
+pub enum WebGL2Stage {
+    PreRenderResource,
+}
 
 #[derive(Default)]
 pub struct WebGL2Plugin;
@@ -86,26 +90,26 @@ impl Plugin for WebGL2Plugin {
         let render_system = webgl2_render_system(resources);
         let handle_events_system = webgl2_handle_window_created_events_system();
         app.add_stage_before(
-            RENDER_RESOURCE,
-            "webgl2_pre_render_resource",
+            RenderStage::RenderResource,
+            WebGL2Stage::PreRenderResource,
             SystemStage::parallel(),
         )
-        .add_system_to_stage("webgl2_pre_render_resource", handle_events_system.system())
-        .add_system_to_stage(RENDER, render_system.system())
         .add_system_to_stage(
-            bevy::render::stage::POST_RENDER,
+            WebGL2Stage::PreRenderResource,
+            handle_events_system.exclusive_system(),
+        )
+        .add_system_to_stage(RenderStage::Render, render_system.exclusive_system())
+        .add_system_to_stage(
+            RenderStage::PostRender,
             shared_buffers_update_system.system(),
         );
     }
 }
 
-#[derive(Default)]
-pub struct State {
-    pub window_created_event_reader: EventReader<WindowCreated>,
-}
-
 pub fn webgl2_handle_window_created_events_system() -> impl FnMut(&mut World, &mut Resources) {
-    let mut window_created_event_reader: EventReader<WindowCreated> = Default::default();
+    let events = Events::<WindowCreated>::default();
+    let mut window_created_event_reader = events.get_reader();
+
     move |_, resources| {
         let events = {
             let window_created_events = resources.get::<Events<WindowCreated>>().unwrap();

@@ -22,7 +22,7 @@ default = [
 
 [dependencies]
 winit = {version = "0.24.0", features = ["web-sys"]}
-bevy = {version = "0.4.0", default-features = false}
+bevy = { git = "https://github.com/bevyengine/bevy/", rev="c2a427f1a38db6b1d9798e631a7da7a8507fe18c", default-features=false }
 regex = "1.4"
 cfg-if = "1.0.0"
 js-sys = "0.3.45"
@@ -46,8 +46,8 @@ web-sys = {version = "0.3.45", features = [
 
 [dev-dependencies]
 compile-time-run = "0.2"
-rand = "0.7"
-getrandom = {version="0.1", features=["wasm-bindgen"]}
+rand = "0.8"
+getrandom = { version = "0.1", features = ["wasm-bindgen"] }
 
 [profile.release]
 opt-level = 's'
@@ -64,7 +64,7 @@ name = "sprite_sheet"
 path = "examples/2d/sprite_sheet.rs"
 
 # disabled as it do not compile on github Actions
-# [[example]]
+#[[example]]
 # name = "contributors"
 # path = "examples/2d/contributors.rs"
 

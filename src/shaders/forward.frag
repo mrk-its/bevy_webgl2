@@ -52,7 +52,7 @@ void main() {
     );
 #endif
 
-#ifdef STANDARDMATERIAL_SHADED
+#ifndef STANDARDMATERIAL_UNLIT
     vec3 normal = normalize(v_Normal);
     // accumulate color
     vec3 color = AmbientColor;

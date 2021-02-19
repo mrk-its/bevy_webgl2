@@ -7,11 +7,12 @@ use bevy::asset::{Assets, Handle, HandleUntyped};
 use bevy::log::prelude::*;
 use bevy::render::{
     pipeline::{
-        BindGroupDescriptor, BindGroupDescriptorId, BindType, PipelineDescriptor, PipelineLayout,
+        BindGroupDescriptor, BindGroupDescriptorId, BindType, IndexFormat, PipelineDescriptor,
+        PipelineLayout,
     },
     renderer::{
-        BindGroup, BufferId, BufferInfo, BufferUsage, RenderResourceBinding, RenderResourceContext,
-        RenderResourceId, SamplerId, TextureId,
+        BindGroup, BufferId, BufferInfo, BufferMapMode, BufferUsage, RenderResourceBinding,
+        RenderResourceContext, RenderResourceId, SamplerId, TextureId,
     },
     shader::{Shader, ShaderError, ShaderSource, ShaderStage, ShaderStages},
     texture::{SamplerDescriptor, TextureDescriptor},
@@ -279,7 +280,16 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         // );
     }
 
-    fn map_buffer(&self, _id: BufferId) {
+    fn read_mapped_buffer(
+        &self,
+        _id: BufferId,
+        _range: Range<u64>,
+        _read: &dyn Fn(&[u8], &dyn RenderResourceContext),
+    ) {
+        unimplemented!();
+    }
+
+    fn map_buffer(&self, _id: BufferId, _mode: BufferMapMode) {
         // info!("map buffer {:?}", _id);
     }
 
@@ -418,7 +428,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
                         gl_call!(gl.get_uniform_location(&program.program, &binding.name))
                     {
                         info!("found uniform location: {:?}", uniform_location);
-                        if let BindType::SampledTexture { .. } = binding.bind_type {
+                        if let BindType::Texture { .. } = binding.bind_type {
                             let texture_unit = self
                                 .resources
                                 .get_or_create_texture_unit(bind_group.index, binding.index);
@@ -469,10 +479,11 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
             vao,
             update_vao: false,
             index_buffer: None,
+            index_format: IndexFormat::Uint32,
             vertex_buffer: None,
-            color_states: pipeline_descriptor.color_states.clone(),
-            depth_stencil_state: pipeline_descriptor.depth_stencil_state.clone(),
-            rasterization_state: pipeline_descriptor.rasterization_state.clone(),
+            color_target_states: pipeline_descriptor.color_target_states.clone(),
+            depth_stencil: pipeline_descriptor.depth_stencil.clone(),
+            primitive: pipeline_descriptor.primitive.clone(),
             scissors_state: None,
         };
         self.pipeline_descriptors

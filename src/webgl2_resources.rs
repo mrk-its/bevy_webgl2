@@ -8,9 +8,9 @@ use crate::{
 use bevy::asset::{Handle, HandleUntyped};
 use bevy::render::{
     pipeline::{
-        BindGroupDescriptor, BindGroupDescriptorId, ColorStateDescriptor,
-        DepthStencilStateDescriptor, InputStepMode, PipelineDescriptor,
-        RasterizationStateDescriptor, VertexAttributeDescriptor, VertexBufferDescriptor,
+        BindGroupDescriptor, BindGroupDescriptorId, ColorTargetState, DepthStencilState,
+        IndexFormat, InputStepMode, PipelineDescriptor, PrimitiveState, VertexAttribute,
+        VertexBufferLayout,
     },
     renderer::{BindGroupId, BufferId, BufferInfo, RenderResourceId, SamplerId, TextureId},
     shader::ShaderStages,
@@ -27,21 +27,21 @@ pub struct GlVertexFormat {
     pub normalized: bool,
 }
 
-pub struct GlVertexAttributeDescriptor {
+pub struct GlVertexAttribute {
     pub name: Cow<'static, str>,
     pub offset: i32,
     pub format: GlVertexFormat,
     pub attrib_location: i32,
 }
 
-impl GlVertexAttributeDescriptor {
+impl GlVertexAttribute {
     pub fn from(
         gl: &WebGl2RenderingContext,
         program: &WebGlProgram,
-        attr: &VertexAttributeDescriptor,
-    ) -> GlVertexAttributeDescriptor {
+        attr: &VertexAttribute,
+    ) -> GlVertexAttribute {
         let attrib_location = gl_call!(gl.get_attrib_location(&program, &*attr.name));
-        GlVertexAttributeDescriptor {
+        GlVertexAttribute {
             name: attr.name.to_owned(),
             offset: attr.offset as i32,
             format: gl_vertex_format(&attr.format),
@@ -54,14 +54,14 @@ pub struct GlVertexBufferDescripror {
     pub name: Cow<'static, str>,
     pub stride: i32,
     pub step_mode: InputStepMode,
-    pub attributes: Vec<GlVertexAttributeDescriptor>,
+    pub attributes: Vec<GlVertexAttribute>,
 }
 
 impl GlVertexBufferDescripror {
     pub fn from(
         gl: &WebGl2RenderingContext,
         program: &WebGlProgram,
-        vertex_buffer_descriptor: &VertexBufferDescriptor,
+        vertex_buffer_descriptor: &VertexBufferLayout,
     ) -> GlVertexBufferDescripror {
         GlVertexBufferDescripror {
             name: vertex_buffer_descriptor.name.to_owned(),
@@ -70,7 +70,7 @@ impl GlVertexBufferDescripror {
             attributes: vertex_buffer_descriptor
                 .attributes
                 .iter()
-                .map(|attr| GlVertexAttributeDescriptor::from(gl, program, attr))
+                .map(|attr| GlVertexAttribute::from(gl, program, attr))
                 .collect(),
         }
     }
@@ -82,10 +82,11 @@ pub struct WebGL2Pipeline {
     pub vao: WebGlVertexArrayObject,
     pub vertex_buffer: Option<BufferId>,
     pub index_buffer: Option<BufferId>,
+    pub index_format: IndexFormat,
     pub update_vao: bool,
-    pub color_states: Vec<ColorStateDescriptor>,
-    pub depth_stencil_state: Option<DepthStencilStateDescriptor>,
-    pub rasterization_state: Option<RasterizationStateDescriptor>,
+    pub color_target_states: Vec<ColorTargetState>,
+    pub depth_stencil: Option<DepthStencilState>,
+    pub primitive: PrimitiveState,
     pub scissors_state: Option<ScissorsState>,
 }
 

@@ -18,7 +18,7 @@ fn main() {
         .add_asset::<MyMaterial>()
         .add_startup_system(setup.system())
         .add_system_to_stage(
-            stage::POST_UPDATE,
+            CoreStage::PostUpdate,
             asset_shader_defs_system::<MyMaterial>.system(),
         )
         .run();
@@ -135,7 +135,7 @@ fn setup(
         })
         .with(blue_material)
         // camera
-        .spawn(Camera3dBundle {
+        .spawn(PerspectiveCameraBundle {
             transform: Transform::from_translation(Vec3::new(3.0, 5.0, -8.0))
                 .looking_at(Vec3::default(), Vec3::unit_y()),
             ..Default::default()

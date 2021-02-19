@@ -114,7 +114,6 @@ impl RenderContext for WebGL2RenderContext {
             )
         )
         .expect("tex image");
-        gl_call!(gl.generate_mipmap(Gl::TEXTURE_2D));
 
         gl_call!(gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_MIN_FILTER, Gl::NEAREST as i32));
         gl_call!(gl.tex_parameteri(Gl::TEXTURE_2D, Gl::TEXTURE_MAG_FILTER, Gl::NEAREST as i32));
@@ -132,6 +131,32 @@ impl RenderContext for WebGL2RenderContext {
         //     Gl::TEXTURE_MIN_FILTER,
         //     Gl::NEAREST as i32,
         // ));
+    }
+
+    fn copy_texture_to_buffer(
+        &mut self,
+        _source_texture: TextureId,
+        _source_origin: [u32; 3],
+        _source_mip_level: u32,
+        _destination_buffer: BufferId,
+        _destination_offset: u64,
+        _destination_bytes_per_row: u32,
+        _size: Extent3d,
+    ) {
+        unimplemented!()
+    }
+
+    fn copy_texture_to_texture(
+        &mut self,
+        _source_texture: TextureId,
+        _source_origin: [u32; 3],
+        _source_mip_level: u32,
+        _destination_texture: TextureId,
+        _destination_origin: [u32; 3],
+        _destination_mip_level: u32,
+        _size: Extent3d,
+    ) {
+        unimplemented!()
     }
 
     fn resources(&self) -> &dyn RenderResourceContext {
@@ -170,7 +195,6 @@ impl RenderContext for WebGL2RenderContext {
         }
         let mut render_pass = WebGL2RenderPass {
             render_context: self,
-            pipeline_descriptor: None,
             pipeline: None,
         };
         run_pass(&mut render_pass);

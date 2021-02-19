@@ -102,7 +102,7 @@ fn setup(
         })
         .with(material)
         // camera
-        .spawn(Camera3dBundle {
+        .spawn(PerspectiveCameraBundle {
             transform: Transform::from_translation(Vec3::new(3.0, 5.0, -8.0))
                 .looking_at(Vec3::default(), Vec3::unit_y()),
             ..Default::default()
