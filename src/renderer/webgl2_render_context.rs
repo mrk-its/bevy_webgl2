@@ -175,6 +175,7 @@ impl RenderContext for WebGL2RenderContext {
     ) {
         let mut clear_mask = 0;
         let gl = &self.device.get_context();
+        gl_call!(gl.disable(Gl::SCISSOR_TEST));
 
         if let LoadOp::Clear(c) = pass_descriptor.color_attachments[0].ops.load {
             gl_call!(gl.clear_color(c.r(), c.g(), c.b(), c.a()));
