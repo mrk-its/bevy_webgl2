@@ -11,7 +11,7 @@ use bevy::render::{
         PipelineLayout,
     },
     renderer::{
-        BindGroup, BufferId, BufferInfo, RenderResourceBinding,
+        BindGroup, BufferId, BufferInfo, BufferUsage, BufferMapMode, RenderResourceBinding,
         RenderResourceContext, RenderResourceId, SamplerId, TextureId,
     },
     shader::{Shader, ShaderError, ShaderSource, ShaderStage, ShaderStages},
