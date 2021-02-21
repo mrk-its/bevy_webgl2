@@ -1,7 +1,6 @@
 use super::{Gl, WebGL2RenderResourceContext};
 use crate::converters::*;
 use crate::{gl_call, Buffer, WebGL2RenderPass};
-use bevy::render::texture::TextureFormat;
 use bevy::render::{
     pass::{LoadOp, PassDescriptor, RenderPass, TextureAttachment},
     renderer::{BufferId, RenderContext, RenderResourceBindings, RenderResourceContext, TextureId},
@@ -30,87 +29,7 @@ impl WebGL2RenderContext {
 }
 
 impl RenderContext for WebGL2RenderContext {
-    fn read_pixels_slice(
-        &mut self,
-        index: u32,
-        format: TextureFormat,
-        x: u32,
-        y: u32,
-        width: u32,
-        height: u32,
-        buffer: &mut [u8],
-    ) {
-        let gl = &self.device.get_context();
-        let fmt = match format {
-            TextureFormat::Rg32Uint => Gl::RG_INTEGER,
-            TextureFormat::Rgba16Uint => Gl::RGBA_INTEGER,
-            _ => panic!("not supported"),
-        };
-        gl_call!(gl.read_buffer(Gl::COLOR_ATTACHMENT0 + index));
-        let buffer: Object = unsafe {
-            let len = buffer.len() / 4;
-            let buffer = &mut std::mem::transmute::<&mut [u8], &mut [u32]>(buffer)[..len];
-            js_sys::Uint32Array::view_mut_raw(buffer.as_mut_ptr(), buffer.len()).into()
-        };
-        gl_call!(gl.read_pixels_with_array_buffer_view_and_dst_offset(
-            x as i32,
-            y as i32,
-            width as i32,
-            height as i32,
-            fmt,
-            Gl::UNSIGNED_INT,
-            &buffer,
-            0,
-        ))
-        .unwrap();
-        let sync = gl.fence_sync(Gl::SYNC_GPU_COMMANDS_COMPLETE, 0).unwrap();
-        gl.flush();
-        gl.client_wait_sync_with_u32(&sync, 0, 0);
-        gl.delete_sync(Some(&sync));
-    }
 
-    fn read_pixels(
-        &mut self,
-        index: u32,
-        format: TextureFormat,
-        x: u32,
-        y: u32,
-        width: u32,
-        height: u32,
-        destination_buffer: BufferId,
-    ) {
-        let gl = &self.device.get_context();
-        let resources = &self.render_resource_context.resources;
-        let buffers = resources.buffers.read();
-        let dst = buffers.get(&destination_buffer).unwrap();
-        if let Buffer::WebGlBuffer(dst_id) = &dst.buffer {
-            gl_call!(gl.bind_buffer(Gl::PIXEL_PACK_BUFFER, Some(&dst_id)));
-            gl_call!(gl.read_buffer(Gl::COLOR_ATTACHMENT0 + index));
-            // let buffer: Object = unsafe {
-            //     js_sys::Uint32Array::view_mut_raw(buffer.as_mut_ptr(), (width * height * 4) as usize)
-            //         .into()
-            // };
-            let fmt = match format {
-                TextureFormat::Rg32Uint => Gl::RGBA_INTEGER,
-                TextureFormat::Rgba16Uint => Gl::RGBA_INTEGER,
-                _ => panic!("not supported"),
-            };
-            gl_call!(gl.read_pixels_with_i32(
-                x as i32,
-                y as i32,
-                width as i32,
-                height as i32,
-                fmt,
-                Gl::UNSIGNED_INT,
-                0,
-            ))
-            .unwrap();
-            let sync = gl.fence_sync(Gl::SYNC_GPU_COMMANDS_COMPLETE, 0).unwrap();
-            gl.flush();
-            gl.client_wait_sync_with_u32(&sync, 0, 0);
-            gl.delete_sync(Some(&sync));
-        }
-    }
     fn copy_buffer_to_buffer(
         &mut self,
         source_buffer: BufferId,
@@ -237,15 +156,70 @@ impl RenderContext for WebGL2RenderContext {
 
     fn copy_texture_to_buffer(
         &mut self,
-        _source_texture: TextureId,
-        _source_origin: [u32; 3],
+        source_texture: TextureId,
+        source_origin: [u32; 3],
         _source_mip_level: u32,
-        _destination_buffer: BufferId,
+        destination_buffer: BufferId,
         _destination_offset: u64,
         _destination_bytes_per_row: u32,
-        _size: Extent3d,
+        size: Extent3d,
     ) {
-        unimplemented!()
+        let gl = &self.device.get_context();
+        let resources = &self.render_resource_context.resources;
+        let buffers = resources.buffers.read();
+        let dst = buffers.get(&destination_buffer).unwrap();
+        let texture_descriptors = resources.texture_descriptors.read();
+        let texture_descriptor = texture_descriptors.get(&source_texture).unwrap();
+
+        // TODO add recommended read format
+        let (_, _, _type) = texture_descriptor.format.webgl2_into();
+        let read_fmt = match _type {
+            Gl::UNSIGNED_INT => Gl::RGBA_INTEGER,
+            Gl::INT => Gl::RGBA_INTEGER,
+            Gl::UNSIGNED_BYTE => Gl::RGBA,
+            _ => panic!("not supported read_pixels fmt"),
+        };
+
+        let mut framebuffers = self.render_resource_context.resources.framebuffers.write();
+        if let Some(fb) = framebuffers.get(&source_texture) {
+            gl_call!(gl.bind_framebuffer(Gl::FRAMEBUFFER, Some(&fb)));
+        } else {
+            let textures = self.render_resource_context.resources.textures.read();
+            let gl_texture = textures.get(&source_texture);
+            let fb = gl_call!(gl.create_framebuffer()).unwrap();
+            gl_call!(gl.bind_framebuffer(Gl::FRAMEBUFFER, Some(&fb)));
+            framebuffers.insert(source_texture, fb);
+            gl_call!(gl.framebuffer_texture_2d(
+                Gl::FRAMEBUFFER,
+                Gl::COLOR_ATTACHMENT0 as u32,
+                Gl::TEXTURE_2D,
+                gl_texture,
+                0,
+            ));
+            assert!(
+                gl.check_framebuffer_status(Gl::FRAMEBUFFER)
+                    == Gl::FRAMEBUFFER_COMPLETE
+            );
+        }
+        if let Buffer::WebGlBuffer(dst_id) = &dst.buffer {
+            gl_call!(gl.bind_buffer(Gl::PIXEL_PACK_BUFFER, Some(&dst_id)));
+            gl_call!(gl.read_buffer(Gl::COLOR_ATTACHMENT0));
+            // bevy::utils::tracing::info!("read_pixels, width: {}, height: {}, fmt: {}, type: {}", size.width, size.height, format, _type);
+            gl_call!(gl.read_pixels_with_i32(
+                source_origin[0] as i32,
+                source_origin[1] as i32,
+                size.width as i32,
+                size.height as i32,
+                read_fmt,
+                _type,
+                0,
+            ))
+            .unwrap();
+            let sync = gl.fence_sync(Gl::SYNC_GPU_COMMANDS_COMPLETE, 0).unwrap();
+            gl.flush();
+            gl.client_wait_sync_with_u32(&sync, 0, 0);
+            gl.delete_sync(Some(&sync));
+        }
     }
 
     fn copy_texture_to_texture(

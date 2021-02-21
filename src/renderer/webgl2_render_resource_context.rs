@@ -317,11 +317,26 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
 
     fn read_mapped_buffer(
         &self,
-        _id: BufferId,
-        _range: Range<u64>,
-        _read: &dyn Fn(&[u8], &dyn RenderResourceContext),
+        id: BufferId,
+        range: Range<u64>,
+        read: &dyn Fn(&[u8], &dyn RenderResourceContext),
     ) {
-        unimplemented!();
+        let mut buffers = self.resources.buffers.write();
+        let info = buffers.get_mut(&id).unwrap();
+        if let Buffer::WebGlBuffer(buffer_id) = &info.buffer {
+            let mut data: Vec<u8> = Vec::with_capacity((range.end - range.start) as usize);
+            unsafe {
+                data.set_len((range.end - range.start) as usize);
+            }
+            let gl = &self.device.get_context();
+            gl.bind_buffer(Gl::PIXEL_PACK_BUFFER, Some(buffer_id));
+            gl.get_buffer_sub_data_with_i32_and_u8_array(
+                Gl::PIXEL_PACK_BUFFER,
+                0,
+                data.as_mut(),
+            );
+            read(data.as_mut(), self);
+        }
     }
 
     fn map_buffer(&self, _id: BufferId, _mode: BufferMapMode) {
@@ -330,19 +345,6 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
 
     fn unmap_buffer(&self, _id: BufferId) {
         // info!("unmap buffer {:?}", _id);
-    }
-    fn read_buffer(&self, id: BufferId, data: &mut [u8]) {
-        let mut buffers = self.resources.buffers.write();
-        let info = buffers.get_mut(&id).unwrap();
-        if let Buffer::WebGlBuffer(buffer_id) = &info.buffer {
-            let gl = &self.device.get_context();
-            gl.bind_buffer(Gl::PIXEL_PACK_BUFFER, Some(buffer_id));
-            gl.get_buffer_sub_data_with_i32_and_u8_array(
-                Gl::PIXEL_PACK_BUFFER,
-                0,
-                data,
-            )
-        }
     }
 
     fn create_buffer_with_data(&self, info: BufferInfo, data: &[u8]) -> BufferId {
