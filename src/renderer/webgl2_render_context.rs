@@ -29,7 +29,6 @@ impl WebGL2RenderContext {
 }
 
 impl RenderContext for WebGL2RenderContext {
-
     fn copy_buffer_to_buffer(
         &mut self,
         source_buffer: BufferId,

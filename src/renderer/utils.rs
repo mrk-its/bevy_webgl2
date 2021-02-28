@@ -243,7 +243,13 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
             .unwrap();
         let name = info.name();
 
-        if [Gl::SAMPLER_2D, Gl::UNSIGNED_INT_SAMPLER_2D, Gl::INT_SAMPLER_2D].contains(&info.type_()) {
+        if [
+            Gl::SAMPLER_2D,
+            Gl::UNSIGNED_INT_SAMPLER_2D,
+            Gl::INT_SAMPLER_2D,
+        ]
+        .contains(&info.type_())
+        {
             let (group_index, index) =
                 if let Some((group_index, index)) = program.bind_groups.get(&name) {
                     (*group_index, *index)

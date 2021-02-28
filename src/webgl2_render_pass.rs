@@ -168,10 +168,13 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
                 PrimitiveTopology::TriangleStrip => Gl::TRIANGLE_STRIP,
             };
 
-            (primitives, match pipeline.index_format {
-                IndexFormat::Uint16 => (Gl::UNSIGNED_SHORT, 2),
-                IndexFormat::Uint32 => (Gl::UNSIGNED_INT, 4),
-            })
+            (
+                primitives,
+                match pipeline.index_format {
+                    IndexFormat::Uint16 => (Gl::UNSIGNED_SHORT, 2),
+                    IndexFormat::Uint32 => (Gl::UNSIGNED_INT, 4),
+                },
+            )
         };
 
         let ctx = &self.render_context;

@@ -11,7 +11,7 @@ use bevy::render::{
         PipelineLayout,
     },
     renderer::{
-        BindGroup, BufferId, BufferInfo, BufferUsage, BufferMapMode, RenderResourceBinding,
+        BindGroup, BufferId, BufferInfo, BufferMapMode, BufferUsage, RenderResourceBinding,
         RenderResourceContext, RenderResourceId, SamplerId, TextureId,
     },
     shader::{Shader, ShaderError, ShaderSource, ShaderStage, ShaderStages},
@@ -257,7 +257,10 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
                 .ok_or("failed to create_buffer")
                 .unwrap();
             gl_call!(gl.bind_buffer(Gl::UNIFORM_BUFFER, Some(&id)));
-            let type_ = if info.buffer_usage.contains(BufferUsage::COPY_DST|BufferUsage::INDIRECT) {
+            let type_ = if info
+                .buffer_usage
+                .contains(BufferUsage::COPY_DST | BufferUsage::INDIRECT)
+            {
                 Gl::STREAM_READ
             } else {
                 Gl::DYNAMIC_DRAW
@@ -347,11 +350,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
             }
             let gl = &self.device.get_context();
             gl.bind_buffer(Gl::PIXEL_PACK_BUFFER, Some(buffer_id));
-            gl.get_buffer_sub_data_with_i32_and_u8_array(
-                Gl::PIXEL_PACK_BUFFER,
-                0,
-                data.as_mut(),
-            );
+            gl.get_buffer_sub_data_with_i32_and_u8_array(Gl::PIXEL_PACK_BUFFER, 0, data.as_mut());
             read(data.as_mut(), self);
         }
     }

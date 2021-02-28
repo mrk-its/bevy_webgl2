@@ -1,8 +1,8 @@
 use crate::{
     gl_call,
     renderer::{
-        gl_vertex_format, WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlShader,
-        WebGlTexture, WebGlVertexArrayObject, WebGlFramebuffer, WebGlSync
+        gl_vertex_format, WebGl2RenderingContext, WebGlBuffer, WebGlFramebuffer, WebGlProgram,
+        WebGlShader, WebGlSync, WebGlTexture, WebGlVertexArrayObject,
     },
 };
 use bevy::asset::{Handle, HandleUntyped};

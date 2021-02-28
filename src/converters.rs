@@ -1,5 +1,5 @@
-use bevy::{prelude::warn, render::texture::TextureFormat};
 use crate::renderer::*;
+use bevy::{prelude::warn, render::texture::TextureFormat};
 
 pub trait WebGl2From<T> {
     fn from(val: T) -> Self;
@@ -46,13 +46,19 @@ impl WebGl2From<TextureFormat> for (u32, u32, u32) {
             TextureFormat::Bgra8Unorm => {
                 warn!("Bgra8Unorm is unsupported, using Rgba8Unorm instead");
                 (Gl::RGBA8, Gl::RGBA, Gl::UNSIGNED_BYTE)
-            },
+            }
             TextureFormat::Bgra8UnormSrgb => {
                 warn!("Bgra8UnormSrgb is unsupported, using Rgba8UnormSrgb instead");
                 (Gl::SRGB8_ALPHA8, Gl::RGBA, Gl::UNSIGNED_BYTE)
-            },
-            TextureFormat::Rgb10a2Unorm => (Gl::RGB10_A2, Gl::RGBA, Gl::UNSIGNED_INT_2_10_10_10_REV),
-            TextureFormat::Rg11b10Float => (Gl::R11F_G11F_B10F, Gl::RGB, Gl::UNSIGNED_INT_10F_11F_11F_REV),
+            }
+            TextureFormat::Rgb10a2Unorm => {
+                (Gl::RGB10_A2, Gl::RGBA, Gl::UNSIGNED_INT_2_10_10_10_REV)
+            }
+            TextureFormat::Rg11b10Float => (
+                Gl::R11F_G11F_B10F,
+                Gl::RGB,
+                Gl::UNSIGNED_INT_10F_11F_11F_REV,
+            ),
             TextureFormat::Rg32Uint => (Gl::RG32UI, Gl::RG_INTEGER, Gl::UNSIGNED_INT),
             TextureFormat::Rg32Sint => (Gl::RG32I, Gl::RG_INTEGER, Gl::INT),
             TextureFormat::Rg32Float => (Gl::RG32F, Gl::RG, Gl::FLOAT),
@@ -63,8 +69,16 @@ impl WebGl2From<TextureFormat> for (u32, u32, u32) {
             TextureFormat::Rgba32Sint => (Gl::RGBA32I, Gl::RGBA_INTEGER, Gl::INT),
             TextureFormat::Rgba32Float => (Gl::RGBA32F, Gl::RGBA, Gl::FLOAT),
             TextureFormat::Depth32Float => (Gl::DEPTH_COMPONENT32F, Gl::DEPTH_COMPONENT, Gl::FLOAT),
-            TextureFormat::Depth24Plus => (Gl::DEPTH24_STENCIL8, Gl::DEPTH_STENCIL, Gl::UNSIGNED_INT_24_8),
-            TextureFormat::Depth24PlusStencil8 => (Gl::DEPTH24_STENCIL8, Gl::DEPTH_STENCIL, Gl::UNSIGNED_INT_24_8),
+            TextureFormat::Depth24Plus => (
+                Gl::DEPTH24_STENCIL8,
+                Gl::DEPTH_STENCIL,
+                Gl::UNSIGNED_INT_24_8,
+            ),
+            TextureFormat::Depth24PlusStencil8 => (
+                Gl::DEPTH24_STENCIL8,
+                Gl::DEPTH_STENCIL,
+                Gl::UNSIGNED_INT_24_8,
+            ),
         }
     }
 }
