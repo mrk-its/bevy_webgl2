@@ -258,7 +258,10 @@ impl RenderContext for WebGL2RenderContext {
         } else {
             panic!("first attachment must be a texture");
         };
-        let is_swapchain = texture_id == &self.render_resource_context.swapchain_texture;
+        let is_swapchain = texture_id == &self.render_resource_context.swapchain_texture
+            || pass_descriptor.color_attachments[0]
+                .resolve_target
+                .is_some();
         // info!("pass_descriptor: {:#?}", pass_descriptor);
         if is_swapchain {
             gl_call!(gl.bind_framebuffer(
