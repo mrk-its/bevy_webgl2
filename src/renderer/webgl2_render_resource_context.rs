@@ -322,6 +322,22 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         range: Range<u64>,
         read: &dyn Fn(&[u8], &dyn RenderResourceContext),
     ) {
+        let gl = &self.device.get_context();
+        // let fence_sync = self.resources.fence_sync.read();
+        // if fence_sync.is_some() {
+        //     let sync = fence_sync.as_ref().unwrap();
+        //     // let ret = gl.client_wait_sync_with_u32(&sync, Gl::SYNC_FLUSH_COMMANDS_BIT, 0);
+        //     let ret = gl.client_wait_sync_with_u32(sync, Gl::SYNC_FLUSH_COMMANDS_BIT, 0);
+        //     match ret {
+        //         Gl::ALREADY_SIGNALED => info!("already signaled"),
+        //         Gl::CONDITION_SATISFIED => info!("condition satisfied"),
+        //         Gl::TIMEOUT_EXPIRED => info!("timeout expired"),
+        //         _ => info!("unknown err"),
+        //     }
+        // } else {
+        //     info!("no fence sync");
+        // }
+
         let mut buffers = self.resources.buffers.write();
         let info = buffers.get_mut(&id).unwrap();
         if let Buffer::WebGlBuffer(buffer_id) = &info.buffer {

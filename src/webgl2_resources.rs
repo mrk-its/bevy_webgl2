@@ -2,7 +2,7 @@ use crate::{
     gl_call,
     renderer::{
         gl_vertex_format, WebGl2RenderingContext, WebGlBuffer, WebGlProgram, WebGlShader,
-        WebGlTexture, WebGlVertexArrayObject, WebGlFramebuffer,
+        WebGlTexture, WebGlVertexArrayObject, WebGlFramebuffer, WebGlSync
     },
 };
 use bevy::asset::{Handle, HandleUntyped};
@@ -172,6 +172,7 @@ pub struct WebGL2Resources {
     pub short_buffer_id_seq: Arc<RwLock<u32>>,
     pub short_buffer_ids: Arc<RwLock<HashMap<BufferId, u32>>>,
     pub framebuffers: Arc<RwLock<HashMap<TextureId, WebGlFramebuffer>>>,
+    // pub fence_sync: Arc<RwLock<Option<WebGlSync>>>,
 }
 
 impl WebGL2Resources {

@@ -153,7 +153,7 @@ impl RenderContext for WebGL2RenderContext {
         size: Extent3d,
     ) {
         let gl = &self.device.get_context();
-        let resources = &self.render_resource_context.resources;
+        let resources = &mut self.render_resource_context.resources;
         let buffers = resources.buffers.read();
         let dst = buffers.get(&destination_buffer).unwrap();
         let texture_descriptors = resources.texture_descriptors.read();
@@ -168,11 +168,11 @@ impl RenderContext for WebGL2RenderContext {
             _ => panic!("not supported read_pixels fmt"),
         };
 
-        let mut framebuffers = self.render_resource_context.resources.framebuffers.write();
+        let mut framebuffers = resources.framebuffers.write();
         if let Some(fb) = framebuffers.get(&source_texture) {
             gl_call!(gl.bind_framebuffer(Gl::FRAMEBUFFER, Some(&fb)));
         } else {
-            let textures = self.render_resource_context.resources.textures.read();
+            let textures = resources.textures.read();
             let gl_texture = textures.get(&source_texture);
             let fb = gl_call!(gl.create_framebuffer()).unwrap();
             gl_call!(gl.bind_framebuffer(Gl::FRAMEBUFFER, Some(&fb)));
@@ -184,10 +184,7 @@ impl RenderContext for WebGL2RenderContext {
                 gl_texture,
                 0,
             ));
-            assert!(
-                gl.check_framebuffer_status(Gl::FRAMEBUFFER)
-                    == Gl::FRAMEBUFFER_COMPLETE
-            );
+            assert!(gl.check_framebuffer_status(Gl::FRAMEBUFFER) == Gl::FRAMEBUFFER_COMPLETE);
         }
         if let Buffer::WebGlBuffer(dst_id) = &dst.buffer {
             gl_call!(gl.bind_buffer(Gl::PIXEL_PACK_BUFFER, Some(&dst_id)));
@@ -203,10 +200,14 @@ impl RenderContext for WebGL2RenderContext {
                 0,
             ))
             .unwrap();
-            let sync = gl.fence_sync(Gl::SYNC_GPU_COMMANDS_COMPLETE, 0).unwrap();
-            gl.flush();
-            gl.client_wait_sync_with_u32(&sync, 0, 0);
-            gl.delete_sync(Some(&sync));
+            // let sync = gl.fence_sync(Gl::SYNC_GPU_COMMANDS_COMPLETE, 0).unwrap();
+            // gl.client_wait_sync_with_u32(&sync, Gl::SYNC_FLUSH_COMMANDS_BIT, 0);
+            // let mut fence_sync = resources.fence_sync.write();
+            // if fence_sync.is_some() {
+            //     gl.delete_sync(Some(fence_sync.as_ref().unwrap()))
+            // }
+            // fence_sync.replace(sync);
+            // bevy::utils::tracing::info!("created fence sync");
         }
     }
 
