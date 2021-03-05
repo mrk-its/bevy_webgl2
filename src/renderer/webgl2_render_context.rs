@@ -235,7 +235,7 @@ impl RenderContext for WebGL2RenderContext {
         &mut self,
         pass_descriptor: &PassDescriptor,
         _render_resource_bindings: &RenderResourceBindings,
-        run_pass: &mut dyn Fn(&mut dyn RenderPass),
+        run_pass: &mut dyn FnMut(&mut dyn RenderPass),
     ) {
         let gl = &self.device.get_context();
         gl_call!(gl.disable(Gl::SCISSOR_TEST));
