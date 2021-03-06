@@ -46,76 +46,72 @@ pub struct WebGL2Renderer {
 impl WebGL2Renderer {
     pub fn run_graph(&mut self, world: &mut World) {
         world.resource_scope(|mut render_graph: Mut<RenderGraph>, world| {
-            world.resource_scope(
-                |mut render_resource_context: Mut<Box<dyn RenderResourceContext>>, world| {
-                    render_graph.prepare(world);
-                    // stage nodes
-                    let mut stager = DependentNodeStager::loose_grouping();
-                    let stages = stager.get_stages(&render_graph).unwrap();
-                    let mut borrowed = stages.borrow(&mut render_graph);
+            render_graph.prepare(world);
+            // stage nodes
+            let mut stager = DependentNodeStager::loose_grouping();
+            let stages = stager.get_stages(&render_graph).unwrap();
+            let mut borrowed = stages.borrow(&mut render_graph);
 
-                    let render_resource_context = render_resource_context
-                        .downcast_mut::<WebGL2RenderResourceContext>()
-                        .unwrap();
+            let render_resource_context = {
+                let context = world
+                    .get_resource::<Box<dyn RenderResourceContext>>()
+                    .unwrap();
+                context
+                    .downcast_ref::<WebGL2RenderResourceContext>()
+                    .unwrap()
+                    .clone()
+            };
 
-                    let node_outputs: Arc<RwLock<HashMap<NodeId, ResourceSlots>>> =
-                        Default::default();
-                    for stage in borrowed.iter_mut() {
-                        // TODO: sort jobs and slice by "amount of work" / weights
-                        // stage.jobs.sort_by_key(|j| j.node_states.len());
+            let node_outputs: Arc<RwLock<HashMap<NodeId, ResourceSlots>>> = Default::default();
+            for stage in borrowed.iter_mut() {
+                // TODO: sort jobs and slice by "amount of work" / weights
+                // stage.jobs.sort_by_key(|j| j.node_states.len());
 
-                        let chunk_size = stage.jobs.len();
-                        for jobs_chunk in stage.jobs.chunks_mut(chunk_size) {
-                            let render_resource_context = render_resource_context.clone();
-                            let node_outputs = node_outputs.clone();
-                            let mut render_context = WebGL2RenderContext::new(
-                                self.device.clone(),
-                                render_resource_context,
-                            );
-                            for job in jobs_chunk.iter_mut() {
-                                for node_state in job.node_states.iter_mut() {
-                                    // bind inputs from connected node outputs
-                                    for (i, mut input_slot) in
-                                        node_state.input_slots.iter_mut().enumerate()
-                                    {
-                                        if let Edge::SlotEdge {
-                                            output_node,
-                                            output_index,
-                                            ..
-                                        } = node_state.edges.get_input_slot_edge(i).unwrap()
-                                        {
-                                            let node_outputs = node_outputs.read();
-                                            let outputs = if let Some(outputs) =
-                                                node_outputs.get(output_node)
-                                            {
-                                                outputs
-                                            } else {
-                                                panic!("node inputs not set")
-                                            };
-
-                                            let output_resource = outputs
-                                                .get(*output_index)
-                                                .expect("output should be set");
-                                            input_slot.resource = Some(output_resource);
+                let chunk_size = stage.jobs.len();
+                for jobs_chunk in stage.jobs.chunks_mut(chunk_size) {
+                    let render_resource_context = render_resource_context.clone();
+                    let node_outputs = node_outputs.clone();
+                    let mut render_context =
+                        WebGL2RenderContext::new(self.device.clone(), render_resource_context);
+                    for job in jobs_chunk.iter_mut() {
+                        for node_state in job.node_states.iter_mut() {
+                            // bind inputs from connected node outputs
+                            for (i, mut input_slot) in node_state.input_slots.iter_mut().enumerate()
+                            {
+                                if let Edge::SlotEdge {
+                                    output_node,
+                                    output_index,
+                                    ..
+                                } = node_state.edges.get_input_slot_edge(i).unwrap()
+                                {
+                                    let node_outputs = node_outputs.read();
+                                    let outputs =
+                                        if let Some(outputs) = node_outputs.get(output_node) {
+                                            outputs
                                         } else {
-                                            panic!("no edge connected to input")
-                                        }
-                                    }
-                                    node_state.node.update(
-                                        world,
-                                        &mut render_context,
-                                        &node_state.input_slots,
-                                        &mut node_state.output_slots,
-                                    );
-                                    node_outputs
-                                        .write()
-                                        .insert(node_state.id, node_state.output_slots.clone());
+                                            panic!("node inputs not set")
+                                        };
+
+                                    let output_resource =
+                                        outputs.get(*output_index).expect("output should be set");
+                                    input_slot.resource = Some(output_resource);
+                                } else {
+                                    panic!("no edge connected to input")
                                 }
                             }
+                            node_state.node.update(
+                                world,
+                                &mut render_context,
+                                &node_state.input_slots,
+                                &mut node_state.output_slots,
+                            );
+                            node_outputs
+                                .write()
+                                .insert(node_state.id, node_state.output_slots.clone());
                         }
                     }
-                },
-            );
+                }
+            }
         });
     }
 
