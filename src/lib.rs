@@ -5,7 +5,7 @@ mod webgl2_render_pass;
 mod webgl2_renderer;
 mod webgl2_resources;
 use crate::renderer::WebGL2RenderResourceContext;
-use bevy::app::prelude::*;
+use bevy::app::{prelude::*, Events};
 use bevy::window::{WindowCreated, Windows};
 pub use default_plugins::*;
 use std::sync::Arc;
