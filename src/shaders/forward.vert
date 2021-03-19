@@ -11,7 +11,7 @@ out vec3 v_Position;
 out vec3 v_Normal;
 out vec2 v_Uv;
 
-layout(std140) uniform Camera {
+layout(std140) uniform CameraViewProj {
     mat4 ViewProj;
 };
 

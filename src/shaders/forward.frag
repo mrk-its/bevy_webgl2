@@ -15,7 +15,7 @@ in vec2 v_Uv;
 
 out vec4 o_Target;
 
-layout(std140) uniform Camera {
+layout(std140) uniform CameraViewProj {
     mat4 ViewProj;
 };
 

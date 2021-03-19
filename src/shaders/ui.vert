@@ -6,7 +6,7 @@ in vec2 Vertex_Uv;
 
 out vec2 v_Uv;
 
-layout(std140) uniform Camera {
+layout(std140) uniform CameraViewProj {
     mat4 ViewProj;
 };
 

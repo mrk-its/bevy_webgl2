@@ -7,7 +7,7 @@ layout(location = 2) in vec2 Vertex_Uv;
 out vec2 v_Uv;
 out vec4 v_Color;
 
-layout(std140) uniform Camera {
+layout(std140) uniform CameraViewProj {
     mat4 ViewProj;
 };
 
