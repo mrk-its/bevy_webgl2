@@ -33,7 +33,7 @@ pub const SPRITE_PIPELINE_HANDLE: HandleUntyped =
 pub const SPRITE_SHEET_PIPELINE_HANDLE: HandleUntyped =
     HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 9016885805180281612);
 
-pub const FORWARD_PIPELINE_HANDLE: HandleUntyped =
+pub const PBR_PIPELINE_HANDLE: HandleUntyped =
     HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 13148362314012771389);
 
 pub const UI_PIPELINE_HANDLE: HandleUntyped =
@@ -68,9 +68,9 @@ impl Plugin for WebGL2Plugin {
                     include_str!("shaders/sprite_sheet.frag"),
                 ),
                 (
-                    FORWARD_PIPELINE_HANDLE,
-                    include_str!("shaders/forward.vert"),
-                    include_str!("shaders/forward.frag"),
+                    PBR_PIPELINE_HANDLE,
+                    include_str!("shaders/pbr.vert"),
+                    include_str!("shaders/pbr.frag"),
                 ),
                 (
                     UI_PIPELINE_HANDLE,

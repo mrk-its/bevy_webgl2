@@ -157,11 +157,11 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
         let name = gl
             .get_active_uniform_block_name(&program.program, uniform_index)
             .unwrap();
-        if name == "Camera" {
+        if name == "CameraViewProj" {
             let camera_descriptor = BindGroupDescriptor::new(
                 0,
                 vec![BindingDescriptor {
-                    name: "Camera".to_string(),
+                    name: "CameraViewProj".to_string(),
                     index: 0,
                     bind_type: BindType::Uniform {
                         has_dynamic_offset: false,
@@ -174,6 +174,7 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
             bind_groups.push(camera_descriptor);
             continue;
         }
+
         let size = gl
             .get_active_uniform_block_parameter(
                 &program.program,
