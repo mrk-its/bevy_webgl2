@@ -25,9 +25,10 @@ struct ColorText;
 fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         // UI camera
-        .spawn(UiCameraBundle::default())
-        // Text with one section
-        .spawn(TextBundle {
+        .spawn_bundle(UiCameraBundle::default());
+    // Text with one section
+    commands
+        .spawn_bundle(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 position_type: PositionType::Absolute,
@@ -55,9 +56,10 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             ),
             ..Default::default()
         })
-        .with(ColorText)
-        // Rich text with multiple sections
-        .spawn(TextBundle {
+        .insert(ColorText);
+    // Rich text with multiple sections
+    commands
+        .spawn_bundle(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 ..Default::default()
@@ -87,7 +89,7 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             ..Default::default()
         })
-        .with(FpsText);
+        .insert(FpsText);
 }
 
 fn text_update_system(diagnostics: Res<Diagnostics>, mut query: Query<&mut Text, With<FpsText>>) {
