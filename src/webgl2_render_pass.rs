@@ -261,8 +261,10 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
                 } => {
                     // it seems it may not work
                     // (forcing texture_unit=1 do not work properly)
-                    gl_call!(gl.active_texture(Gl::TEXTURE0 + texture_unit));
-                    gl_call!(gl.bind_texture(Gl::TEXTURE_2D, Some(textures.get(texture).unwrap())))
+                    if let Some(texture) = textures.get(texture) {
+                        gl_call!(gl.active_texture(Gl::TEXTURE0 + texture_unit));
+                        gl_call!(gl.bind_texture(Gl::TEXTURE_2D, Some(texture)));
+                    }
                 }
                 crate::WebGL2RenderResourceBinding::Sampler(_) => {
                     // TODO
