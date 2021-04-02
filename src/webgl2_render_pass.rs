@@ -235,8 +235,9 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
                     buffer,
                     range,
                 } => {
-                    let offset =
-                        dynamic_uniform_indices.map_or(range.start as u32, |indices| indices[i]);
+                    let offset = *dynamic_uniform_indices
+                        .and_then(|indices| indices.get(i))
+                        .unwrap_or(&(range.start as u32));
                     let buffer = buffers.get(&buffer).unwrap();
                     let size = if buffer.info.buffer_usage.contains(BufferUsage::STORAGE) {
                         STORAGE_BUFFER_SIZE
