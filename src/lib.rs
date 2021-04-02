@@ -81,12 +81,12 @@ impl Plugin for WebGL2Plugin {
 
             for (pipeline_handle, vert_source, frag_source) in shader_overrides {
                 if let Some(pipeline) = pipelines.get(pipeline_handle) {
-                    shaders.set(
+                    let _ = shaders.set(
                         &pipeline.shader_stages.vertex,
                         Shader::from_glsl(ShaderStage::Vertex, vert_source),
                     );
                     if let Some(frag_handle) = &pipeline.shader_stages.fragment {
-                        shaders.set(
+                        let _ = shaders.set(
                             frag_handle,
                             Shader::from_glsl(ShaderStage::Fragment, frag_source),
                         );

@@ -325,7 +325,7 @@ impl RenderResourceContext for WebGL2RenderResourceContext {
         range: Range<u64>,
         read: &dyn Fn(&[u8], &dyn RenderResourceContext),
     ) {
-        let gl = &self.device.get_context();
+        // let gl = &self.device.get_context();
         // let fence_sync = self.resources.fence_sync.read();
         // if fence_sync.is_some() {
         //     let sync = fence_sync.as_ref().unwrap();
