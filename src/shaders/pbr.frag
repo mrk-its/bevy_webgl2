@@ -39,26 +39,29 @@ const int MAX_LIGHTS = 10;
 
 struct Light {
     mat4 proj;
-    vec3 pos;
-    float inverseRadiusSquared;
-    vec3 color;
-    float unused; // unused 4th element of vec4;
+    vec4 pos;
+    vec4 color;
 };
 
 in vec3 v_WorldPosition;
 in vec3 v_WorldNormal;
 in vec2 v_Uv;
+
+#ifdef STANDARDMATERIAL_NORMAL_MAP
+in vec4 v_WorldTangent;
+#endif
+
 out vec4 o_Target;
 
 layout(std140) uniform CameraViewProj {
     mat4 ViewProj;
 };
 layout(std140) uniform CameraPosition { // set = 0, binding = 1
-    vec3 CameraPos;
+    vec4 CameraPos;
 };
 
 layout(std140) uniform Lights { // set = 1, binding = 0
-    vec3 AmbientColor;
+    vec4 AmbientColor;
     uvec4 NumLights;
     Light SceneLights[MAX_LIGHTS];
 };
@@ -68,8 +71,7 @@ layout(std140) uniform StandardMaterial_base_color { // set = 3, binding = 0
 };
 
 #ifdef STANDARDMATERIAL_BASE_COLOR_TEXTURE
-layout(std140) uniform texture2D StandardMaterial_base_color_texture; // set = 3, binding = 1
-layout(std140) uniform sampler StandardMaterial_base_color_texture_sampler; // set = 3, binding = 2
+uniform sampler2D StandardMaterial_base_color_texture; // set = 3, binding = 1
 #endif
 
 #ifndef STANDARDMATERIAL_UNLIT
@@ -82,9 +84,31 @@ layout(std140) uniform StandardMaterial_metallic { // set = 3, binding = 4
     float metallic;
 };
 
-layout(std140) uniform StandardMaterial_reflectance { // set = 3, binding = 5
+#    ifdef STANDARDMATERIAL_METALLIC_ROUGHNESS_TEXTURE
+uniform sampler2D StandardMaterial_metallic_roughness_texture; // set = 3, binding = 5
+#    endif
+
+layout(std140) uniform StandardMaterial_reflectance { // set = 3, binding = 7
     float reflectance;
 };
+
+#    ifdef STANDARDMATERIAL_NORMAL_MAP
+uniform sampler2D StandardMaterial_normal_map;
+#    endif
+
+#    if defined(STANDARDMATERIAL_OCCLUSION_TEXTURE)
+uniform sampler2D StandardMaterial_occlusion_texture;
+#    endif
+
+layout(std140) uniform StandardMaterial_emissive { // set = 3, binding = 12
+    vec4 emissive;
+};
+
+#    if defined(STANDARDMATERIAL_EMISSIVE_TEXTURE)
+layout(set = 3, binding = 13) uniform texture2D StandardMaterial_emissive_texture;
+layout(set = 3,
+       binding = 14) uniform sampler StandardMaterial_emissive_texture_sampler;
+#    endif
 
 #    define saturate(x) clamp(x, 0.0, 1.0)
 const float PI = 3.141592653589793;
@@ -250,16 +274,50 @@ vec3 reinhard_extended_luminance(vec3 color, float max_white_l) {
 void main() {
     vec4 output_color = base_color;
 #ifdef STANDARDMATERIAL_BASE_COLOR_TEXTURE
-    output_color *= texture(sampler2D(StandardMaterial_base_color_texture,
-                                      StandardMaterial_base_color_texture_sampler),
-                            v_Uv);
+    output_color *= texture(StandardMaterial_base_color_texture, v_Uv);
 #endif
 
 #ifndef STANDARDMATERIAL_UNLIT
     // calculate non-linear roughness from linear perceptualRoughness
+#    ifdef STANDARDMATERIAL_METALLIC_ROUGHNESS_TEXTURE
+    vec4 metallic_roughness = texture(StandardMaterial_metallic_roughness_texture, v_Uv);
+    // Sampling from GLTF standard channels for now
+    float metallic = metallic * metallic_roughness.b;
+    float perceptual_roughness = perceptual_roughness * metallic_roughness.g;
+#    endif
+
     float roughness = perceptualRoughnessToRoughness(perceptual_roughness);
 
     vec3 N = normalize(v_WorldNormal);
+
+#    ifdef STANDARDMATERIAL_NORMAL_MAP
+    vec3 T = normalize(v_WorldTangent.xyz);
+    vec3 B = cross(N, T) * v_WorldTangent.w;
+#    endif
+
+#    ifdef STANDARDMATERIAL_DOUBLE_SIDED
+    N = gl_FrontFacing ? N : -N;
+#        ifdef STANDARDMATERIAL_NORMAL_MAP
+    T = gl_FrontFacing ? T : -T;
+    B = gl_FrontFacing ? B : -B;
+#        endif
+#    endif
+
+#    ifdef STANDARDMATERIAL_NORMAL_MAP
+    mat3 TBN = mat3(T, B, N);
+    N = TBN * normalize(texture(StandardMaterial_normal_map, v_Uv).rgb * 2.0 - 1.0);
+#    endif
+
+#    ifdef STANDARDMATERIAL_OCCLUSION_TEXTURE
+    float occlusion = texture(StandardMaterial_occlusion_texture, v_Uv).r;
+#    else
+    float occlusion = 1.0;
+#    endif
+
+#    ifdef STANDARDMATERIAL_EMISSIVE_TEXTURE
+    // TODO use .a for exposure compensation in HDR
+    emissive.rgb *= texture(StandardMaterial_emissive_texture, v_Uv).rgb;
+#    endif
 
     vec3 V = normalize(CameraPos.xyz - v_WorldPosition.xyz);
     // Neubelt and Pettineo 2013, "Crafting a Next-gen Material Pipeline for The Order: 1886"
@@ -281,7 +339,7 @@ void main() {
         vec3 L = normalize(lightDir);
 
         float rangeAttenuation =
-            getDistanceAttenuation(lightDir, light.inverseRadiusSquared);
+            getDistanceAttenuation(lightDir, light.pos.w);
 
         vec3 H = normalize(L + V);
         float NoL = saturate(dot(N, L));
@@ -309,7 +367,9 @@ void main() {
     vec3 diffuse_ambient = EnvBRDFApprox(diffuseColor, 1.0, NdotV);
     vec3 specular_ambient = EnvBRDFApprox(F0, perceptual_roughness, NdotV);
 
-    output_color.rgb = light_accum + (diffuse_ambient + specular_ambient) * AmbientColor;
+    output_color.rgb = light_accum;
+    output_color.rgb += (diffuse_ambient + specular_ambient) * AmbientColor.xyz * occlusion;
+    output_color.rgb += emissive.rgb * output_color.a;
 
     // tone_mapping
     output_color.rgb = reinhard_luminance(output_color.rgb);

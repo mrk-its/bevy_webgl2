@@ -22,12 +22,12 @@ default = [
 
 [dependencies]
 winit = {version = "0.24.0", features = ["web-sys"]}
-bevy = { git = "https://github.com/bevyengine/bevy/", rev="45b2db70705da24a89426e6b6e77d603a3983025", default-features=false }
+bevy = { git = "https://github.com/bevyengine/bevy/", branch = "main", default-features=false }
 regex = "1.4"
 cfg-if = "1.0.0"
 js-sys = "0.3.45"
 parking_lot = "0.11.0"
-wasm-bindgen = "0.2.59"
+wasm-bindgen = "=0.2.69"
 web-sys = {version = "0.3.45", features = [
   'Document',
   'Element',
