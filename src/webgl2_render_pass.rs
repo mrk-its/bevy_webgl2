@@ -235,8 +235,9 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
                     buffer,
                     range,
                 } => {
-                    let offset =
-                        dynamic_uniform_indices.map_or(range.start as u32, |indices| indices[i]);
+                    let offset = *dynamic_uniform_indices
+                        .and_then(|indices| indices.get(i))
+                        .unwrap_or(&(range.start as u32));
                     let buffer = buffers.get(&buffer).unwrap();
                     let size = if buffer.info.buffer_usage.contains(BufferUsage::STORAGE) {
                         STORAGE_BUFFER_SIZE
@@ -261,8 +262,10 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
                 } => {
                     // it seems it may not work
                     // (forcing texture_unit=1 do not work properly)
-                    gl_call!(gl.active_texture(Gl::TEXTURE0 + texture_unit));
-                    gl_call!(gl.bind_texture(Gl::TEXTURE_2D, Some(textures.get(texture).unwrap())))
+                    if let Some(texture) = textures.get(texture) {
+                        gl_call!(gl.active_texture(Gl::TEXTURE0 + texture_unit));
+                        gl_call!(gl.bind_texture(Gl::TEXTURE_2D, Some(texture)));
+                    }
                 }
                 crate::WebGL2RenderResourceBinding::Sampler(_) => {
                     // TODO

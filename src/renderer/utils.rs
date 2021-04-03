@@ -157,23 +157,49 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
         let name = gl
             .get_active_uniform_block_name(&program.program, uniform_index)
             .unwrap();
-        if name == "Camera" {
-            let camera_descriptor = BindGroupDescriptor::new(
-                0,
-                vec![BindingDescriptor {
-                    name: "Camera".to_string(),
-                    index: 0,
-                    bind_type: BindType::Uniform {
-                        has_dynamic_offset: false,
-                        property: UniformProperty::Struct(vec![UniformProperty::Mat4]),
-                    },
-                    shader_stage: BindingShaderStage::VERTEX | BindingShaderStage::FRAGMENT,
-                }],
-            );
-            used_indices.insert(camera_descriptor.index);
-            bind_groups.push(camera_descriptor);
+
+        if name == "CameraPosition" {
+            let camera_position = BindingDescriptor {
+                name: "CameraPosition".to_string(),
+                index: 1,
+                bind_type: BindType::Uniform {
+                    has_dynamic_offset: false,
+                    property: UniformProperty::Struct(vec![UniformProperty::Vec4]),
+                },
+                shader_stage: BindingShaderStage::FRAGMENT,
+            };
+            let bind_group = bind_groups.iter_mut().find(|bg| bg.index == 0);
+            if let Some(bind_group) = bind_group {
+                bind_group.bindings.push(camera_position);
+            } else {
+                used_indices.insert(0);
+
+                bind_groups.push(BindGroupDescriptor::new(0, vec![camera_position]));
+            }
             continue;
         }
+        if name == "CameraViewProj" {
+            let camera_descriptor = BindingDescriptor {
+                name: "CameraViewProj".to_string(),
+                index: 0,
+                bind_type: BindType::Uniform {
+                    has_dynamic_offset: false,
+                    property: UniformProperty::Struct(vec![UniformProperty::Mat4]),
+                },
+                shader_stage: BindingShaderStage::VERTEX | BindingShaderStage::FRAGMENT,
+            };
+            let bind_group = bind_groups.iter_mut().find(|bg| bg.index == 0);
+            if let Some(bind_group) = bind_group {
+                bind_group.bindings.push(camera_descriptor);
+            } else {
+                used_indices.insert(0);
+
+                bind_groups.push(BindGroupDescriptor::new(0, vec![camera_descriptor]));
+            }
+
+            continue;
+        }
+
         let size = gl
             .get_active_uniform_block_parameter(
                 &program.program,

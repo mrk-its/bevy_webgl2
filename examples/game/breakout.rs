@@ -37,68 +37,70 @@ enum Collider {
 }
 
 fn setup(
-    commands: &mut Commands,
+    mut commands: Commands,
     mut materials: ResMut<Assets<ColorMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
     // Add the game's entities to our world
     commands
         // cameras
-        .spawn(OrthographicCameraBundle::new_2d())
-        .spawn(UiCameraBundle::default())
-        // paddle
-        .spawn(SpriteBundle {
+        .spawn_bundle(OrthographicCameraBundle::new_2d());
+    commands.spawn_bundle(UiCameraBundle::default());
+    // paddle
+    commands
+        .spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(0.5, 0.5, 1.0).into()),
             transform: Transform::from_xyz(0.0, -215.0, 0.0),
             sprite: Sprite::new(Vec2::new(120.0, 30.0)),
             ..Default::default()
         })
-        .with(Paddle { speed: 500.0 })
-        .with(Collider::Paddle)
-        // ball
-        .spawn(SpriteBundle {
+        .insert(Paddle { speed: 500.0 })
+        .insert(Collider::Paddle);
+    // ball
+    commands
+        .spawn_bundle(SpriteBundle {
             material: materials.add(Color::rgb(1.0, 0.5, 0.5).into()),
             transform: Transform::from_xyz(0.0, -50.0, 1.0),
             sprite: Sprite::new(Vec2::new(30.0, 30.0)),
             ..Default::default()
         })
-        .with(Ball {
+        .insert(Ball {
             velocity: 400.0 * Vec3::new(0.5, -0.5, 0.0).normalize(),
-        })
-        // scoreboard
-        .spawn(TextBundle {
-            text: Text {
-                sections: vec![
-                    TextSection {
-                        value: "Score: ".to_string(),
-                        style: TextStyle {
-                            font: asset_server.load("fonts/FiraSans-Bold.ttf"),
-                            font_size: 40.0,
-                            color: Color::rgb(0.5, 0.5, 1.0),
-                        },
+        });
+    // scoreboard
+    commands.spawn_bundle(TextBundle {
+        text: Text {
+            sections: vec![
+                TextSection {
+                    value: "Score: ".to_string(),
+                    style: TextStyle {
+                        font: asset_server.load("fonts/FiraSans-Bold.ttf"),
+                        font_size: 40.0,
+                        color: Color::rgb(0.5, 0.5, 1.0),
                     },
-                    TextSection {
-                        value: "".to_string(),
-                        style: TextStyle {
-                            font: asset_server.load("fonts/FiraMono-Medium.ttf"),
-                            font_size: 40.0,
-                            color: Color::rgb(1.0, 0.5, 0.5),
-                        },
-                    },
-                ],
-                ..Default::default()
-            },
-            style: Style {
-                position_type: PositionType::Absolute,
-                position: Rect {
-                    top: Val::Px(5.0),
-                    left: Val::Px(5.0),
-                    ..Default::default()
                 },
+                TextSection {
+                    value: "".to_string(),
+                    style: TextStyle {
+                        font: asset_server.load("fonts/FiraMono-Medium.ttf"),
+                        font_size: 40.0,
+                        color: Color::rgb(1.0, 0.5, 0.5),
+                    },
+                },
+            ],
+            ..Default::default()
+        },
+        style: Style {
+            position_type: PositionType::Absolute,
+            position: Rect {
+                top: Val::Px(5.0),
+                left: Val::Px(5.0),
                 ..Default::default()
             },
             ..Default::default()
-        });
+        },
+        ..Default::default()
+    });
 
     // Add walls
     let wall_material = materials.add(Color::rgb(0.8, 0.8, 0.8).into());
@@ -107,37 +109,40 @@ fn setup(
 
     commands
         // left
-        .spawn(SpriteBundle {
+        .spawn_bundle(SpriteBundle {
             material: wall_material.clone(),
             transform: Transform::from_xyz(-bounds.x / 2.0, 0.0, 0.0),
             sprite: Sprite::new(Vec2::new(wall_thickness, bounds.y + wall_thickness)),
             ..Default::default()
         })
-        .with(Collider::Solid)
-        // right
-        .spawn(SpriteBundle {
+        .insert(Collider::Solid);
+    // right
+    commands
+        .spawn_bundle(SpriteBundle {
             material: wall_material.clone(),
             transform: Transform::from_xyz(bounds.x / 2.0, 0.0, 0.0),
             sprite: Sprite::new(Vec2::new(wall_thickness, bounds.y + wall_thickness)),
             ..Default::default()
         })
-        .with(Collider::Solid)
-        // bottom
-        .spawn(SpriteBundle {
+        .insert(Collider::Solid);
+    // bottom
+    commands
+        .spawn_bundle(SpriteBundle {
             material: wall_material.clone(),
             transform: Transform::from_xyz(0.0, -bounds.y / 2.0, 0.0),
             sprite: Sprite::new(Vec2::new(bounds.x + wall_thickness, wall_thickness)),
             ..Default::default()
         })
-        .with(Collider::Solid)
-        // top
-        .spawn(SpriteBundle {
+        .insert(Collider::Solid);
+    // top
+    commands
+        .spawn_bundle(SpriteBundle {
             material: wall_material,
             transform: Transform::from_xyz(0.0, bounds.y / 2.0, 0.0),
             sprite: Sprite::new(Vec2::new(bounds.x + wall_thickness, wall_thickness)),
             ..Default::default()
         })
-        .with(Collider::Solid);
+        .insert(Collider::Solid);
 
     // Add bricks
     let brick_rows = 4;
@@ -158,13 +163,13 @@ fn setup(
             ) + bricks_offset;
             commands
                 // brick
-                .spawn(SpriteBundle {
+                .spawn_bundle(SpriteBundle {
                     material: brick_material.clone(),
                     sprite: Sprite::new(brick_size),
                     transform: Transform::from_translation(brick_position),
                     ..Default::default()
                 })
-                .with(Collider::Scorable);
+                .insert(Collider::Scorable);
         }
     }
 }
@@ -208,7 +213,7 @@ fn scoreboard_system(scoreboard: Res<Scoreboard>, mut query: Query<&mut Text>) {
 }
 
 fn ball_collision_system(
-    commands: &mut Commands,
+    mut commands: Commands,
     mut scoreboard: ResMut<Scoreboard>,
     mut ball_query: Query<(&mut Ball, &Transform, &Sprite)>,
     collider_query: Query<(Entity, &Collider, &Transform, &Sprite)>,
@@ -229,7 +234,7 @@ fn ball_collision_system(
                 // scorable colliders should be despawned and increment the scoreboard on collision
                 if let Collider::Scorable = *collider {
                     scoreboard.score += 1;
-                    commands.despawn(collider_entity);
+                    commands.entity(collider_entity).despawn();
                 }
 
                 // reflect the ball when it collides

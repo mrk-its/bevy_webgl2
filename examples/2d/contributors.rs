@@ -1,10 +1,6 @@
 use bevy::prelude::*;
 use rand::{prelude::SliceRandom, Rng};
-use std::{
-    collections::BTreeSet,
-    io::{BufRead, BufReader},
-    process::Stdio,
-};
+use std::collections::BTreeSet;
 
 fn main() {
     App::build()
@@ -46,7 +42,7 @@ const COL_SELECTED: Color = Color::WHITE;
 const SHOWCASE_TIMER_SECS: f32 = 3.0;
 
 fn setup(
-    commands: &mut Commands,
+    mut commands: Commands,
     asset_server: Res<AssetServer>,
     mut materials: ResMut<Assets<ColorMaterial>>,
 ) {
@@ -54,9 +50,8 @@ fn setup(
 
     let texture_handle = asset_server.load("branding/icon.png");
 
-    commands
-        .spawn(OrthographicCameraBundle::new_2d())
-        .spawn(UiCameraBundle::default());
+    commands.spawn_bundle(OrthographicCameraBundle::new_2d());
+    commands.spawn_bundle(UiCameraBundle::default());
 
     let mut sel = ContributorSelection {
         order: vec![],
@@ -74,19 +69,20 @@ fn setup(
         // some sprites should be flipped
         let flipped = rnd.gen_bool(0.5);
 
-        let mut transform = Transform::from_xyz(pos.0, pos.1, 0.0);
-        transform.scale.x *= if flipped { -1.0 } else { 1.0 };
+        let transform = Transform::from_xyz(pos.0, pos.1, 0.0);
 
-        commands
-            .spawn((Contributor { color: col },))
-            .with(Velocity {
+        let e = commands
+            .spawn_bundle((Contributor { color: col },))
+            .insert(Velocity {
                 translation: velocity,
                 rotation: -dir * 5.0,
             })
-            .with_bundle(SpriteBundle {
+            .insert_bundle(SpriteBundle {
                 sprite: Sprite {
                     size: Vec2::new(1.0, 1.0) * SPRITE_SIZE,
                     resize_mode: SpriteResizeMode::Manual,
+                    flip_x: flipped,
+                    ..Default::default()
                 },
                 material: materials.add(ColorMaterial {
                     color: COL_DESELECTED * col,
@@ -94,20 +90,19 @@ fn setup(
                 }),
                 ..Default::default()
             })
-            .with(transform);
-
-        let e = commands.current_entity().unwrap();
+            .insert(transform)
+            .id();
 
         sel.order.push((name, e));
     }
 
     sel.order.shuffle(&mut rnd);
 
-    commands.spawn((SelectTimer, Timer::from_seconds(SHOWCASE_TIMER_SECS, true)));
+    commands.spawn_bundle((SelectTimer, Timer::from_seconds(SHOWCASE_TIMER_SECS, true)));
 
     commands
-        .spawn((ContributorDisplay,))
-        .with_bundle(TextBundle {
+        .spawn_bundle((ContributorDisplay,))
+        .insert_bundle(TextBundle {
             style: Style {
                 align_self: AlignSelf::FlexEnd,
                 ..Default::default()
@@ -143,14 +138,14 @@ fn setup(
 fn select_system(
     mut materials: ResMut<Assets<ColorMaterial>>,
     mut sel: ResMut<ContributorSelection>,
-    mut dq: Query<Mut<Text>, With<ContributorDisplay>>,
-    mut tq: Query<Mut<Timer>, With<SelectTimer>>,
+    mut dq: Query<&mut Text, With<ContributorDisplay>>,
+    mut tq: Query<&mut Timer, With<SelectTimer>>,
     mut q: Query<(&Contributor, &Handle<ColorMaterial>, &mut Transform)>,
     time: Res<Time>,
 ) {
     let mut timer_fired = false;
     for mut t in tq.iter_mut() {
-        if !t.tick(time.delta_seconds()).just_finished() {
+        if !t.tick(time.delta()).just_finished() {
             continue;
         }
         t.reset();
@@ -231,7 +226,7 @@ fn deselect(
 }
 
 /// Applies gravity to all entities with velocity
-fn velocity_system(time: Res<Time>, mut q: Query<Mut<Velocity>>) {
+fn velocity_system(time: Res<Time>, mut q: Query<&mut Velocity>) {
     let delta = time.delta_seconds();
 
     for mut v in q.iter_mut() {
@@ -246,7 +241,7 @@ fn velocity_system(time: Res<Time>, mut q: Query<Mut<Velocity>>) {
 /// force.
 fn collision_system(
     wins: Res<Windows>,
-    mut q: Query<(Mut<Velocity>, Mut<Transform>), With<Contributor>>,
+    mut q: Query<(&mut Velocity, &mut Transform), With<Contributor>>,
 ) {
     let mut rnd = rand::thread_rng();
 
@@ -288,7 +283,7 @@ fn collision_system(
 }
 
 /// Apply velocity to positions and rotations.
-fn move_system(time: Res<Time>, mut q: Query<(&Velocity, Mut<Transform>)>) {
+fn move_system(time: Res<Time>, mut q: Query<(&Velocity, &mut Transform)>) {
     let delta = time.delta_seconds();
 
     for (v, mut t) in q.iter_mut() {
