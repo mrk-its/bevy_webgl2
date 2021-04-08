@@ -30,7 +30,7 @@ in vec3 Vertex_Position;
 in vec3 Vertex_Color;
 out vec3 v_color;
 
-layout(std140) uniform Camera {
+layout(std140) uniform CameraViewProj {
     mat4 ViewProj;
 };
 

@@ -37,7 +37,7 @@ const VERTEX_SHADER: &str = r#"
 #version 300 es
 precision highp float;
 in vec3 Vertex_Position;
-layout(std140) uniform Camera {
+layout(std140) uniform CameraViewProj {
     mat4 ViewProj;
 };
 layout(std140) uniform Transform { // set = 1, binding = 0
