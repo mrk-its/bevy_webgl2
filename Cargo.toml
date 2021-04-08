@@ -5,7 +5,7 @@ edition = "2018"
 keywords = ["bevy", "webgl", "webgl2"]
 license = "MIT"
 name = "bevy_webgl2"
-version = "0.4.3"
+version = "0.5.0-beta.1"
 repository = "https://github.com/mrk-its/bevy_webgl2"
 readme = "README.md"
 exclude = ["assets/**/*", ".github/**/*", "index.html", "fix_bevy_example.sh", "Makefile.toml"]
@@ -22,7 +22,7 @@ default = [
 
 [dependencies]
 winit = {version = "0.24.0", features = ["web-sys"]}
-bevy = { git = "https://github.com/bevyengine/bevy/", branch = "main", default-features=false }
+bevy = { version="0.5.0", default-features=false }
 regex = "1.4"
 cfg-if = "1.0.0"
 js-sys = "0.3.45"
@@ -78,6 +78,10 @@ name = "3d_scene"
 path = "examples/3d/3d_scene.rs"
 
 [[example]]
+name = "pbr"
+path = "examples/3d/pbr.rs"
+
+[[example]]
 name = "texture"
 path = "examples/3d/texture.rs"
 
@@ -92,10 +96,6 @@ path = "examples/3d/render_to_texture.rs"
 [[example]]
 name = "parenting"
 path = "examples/3d/parenting.rs"
-
-[[example]]
-name = "z_sort_debug"
-path = "examples/3d/z_sort_debug.rs"
 
 [[example]]
 name = "text"

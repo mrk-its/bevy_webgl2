@@ -104,7 +104,7 @@ fn setup(
     // camera
     commands.spawn_bundle(PerspectiveCameraBundle {
         transform: Transform::from_translation(Vec3::new(3.0, 5.0, -8.0))
-            .looking_at(Vec3::default(), Vec3::Y),
+            .looking_at(Vec3::ZERO, Vec3::Y),
         ..Default::default()
     });
 }
