@@ -90,10 +90,6 @@ name = "load_gltf"
 path = "examples/3d/load_gltf.rs"
 
 [[example]]
-name = "render_to_texture"
-path = "examples/3d/render_to_texture.rs"
-
-[[example]]
 name = "parenting"
 path = "examples/3d/parenting.rs"
 
