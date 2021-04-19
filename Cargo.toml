@@ -69,9 +69,9 @@ name = "sprite_sheet"
 path = "examples/2d/sprite_sheet.rs"
 
 # disabled as it do not compile on github Actions
-[[example]]
-name = "contributors"
-path = "examples/2d/contributors.rs"
+# [[example]]
+# name = "contributors"
+# path = "examples/2d/contributors.rs"
 
 [[example]]
 name = "3d_scene"
