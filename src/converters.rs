@@ -21,14 +21,14 @@ where
 impl WebGl2From<TextureFormat> for (u32, u32, u32) {
     fn from(val: TextureFormat) -> Self {
         match val {
-            TextureFormat::R8Unorm => (Gl::R8, Gl::RGBA_INTEGER, Gl::INT),
+            TextureFormat::R8Unorm => (Gl::R8, Gl::RED, Gl::UNSIGNED_BYTE),
             TextureFormat::R8Snorm => (Gl::R8_SNORM, Gl::RED, Gl::BYTE),
-            TextureFormat::R8Uint => (Gl::R8UI, Gl::RGBA_INTEGER, Gl::UNSIGNED_INT),
+            TextureFormat::R8Uint => (Gl::R8UI, Gl::RED_INTEGER, Gl::UNSIGNED_BYTE),
             TextureFormat::R8Sint => (Gl::R8I, Gl::RGBA_INTEGER, Gl::INT),
             TextureFormat::R16Uint => (Gl::R16UI, Gl::RGBA_INTEGER, Gl::UNSIGNED_INT),
             TextureFormat::R16Sint => (Gl::R16I, Gl::RGBA_INTEGER, Gl::INT),
             TextureFormat::R16Float => (Gl::R16F, Gl::RED, Gl::HALF_FLOAT),
-            TextureFormat::Rg8Unorm => (Gl::RG8, Gl::RGBA, Gl::UNSIGNED_BYTE),
+            TextureFormat::Rg8Unorm => (Gl::RG8, Gl::RG, Gl::UNSIGNED_BYTE),
             TextureFormat::Rg8Snorm => (Gl::RG8_SNORM, Gl::RG, Gl::BYTE),
             TextureFormat::Rg8Uint => (Gl::RG8UI, Gl::RG_INTEGER, Gl::UNSIGNED_BYTE),
             TextureFormat::Rg8Sint => (Gl::RG8I, Gl::RG_INTEGER, Gl::BYTE),
