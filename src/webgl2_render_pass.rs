@@ -2,7 +2,7 @@ use crate::{gl_call, renderer::*, Buffer, ScissorsState};
 use bevy::render::{
     pass::RenderPass,
     pipeline::{
-        BindGroupDescriptorId, BlendFactor, BlendOperation, CullMode, IndexFormat,
+        BindGroupDescriptorId, BlendFactor, BlendOperation, CullMode, FrontFace, IndexFormat,
         PipelineDescriptor,
     },
     renderer::{BindGroupId, BufferId, BufferUsage, RenderContext},
@@ -299,6 +299,11 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
                 gl_call!(gl.enable(Gl::CULL_FACE));
                 gl_call!(gl.cull_face(Gl::BACK));
             }
+        }
+
+        match &pipeline.primitive.front_face {
+            FrontFace::Cw => gl_call!(gl.front_face(Gl::CW)),
+            FrontFace::Ccw => gl_call!(gl.front_face(Gl::CCW)),
         }
 
         if let Some(state) = &pipeline.depth_stencil {
