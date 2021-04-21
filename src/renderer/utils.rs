@@ -153,6 +153,8 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
         index
     }
 
+    let mut names: Vec<String> = Vec::with_capacity(active_uniform_blocks as usize);
+
     for uniform_index in 0..active_uniform_blocks {
         let name = gl
             .get_active_uniform_block_name(&program.program, uniform_index)
@@ -176,9 +178,7 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
 
                 bind_groups.push(BindGroupDescriptor::new(0, vec![camera_position]));
             }
-            continue;
-        }
-        if name == "CameraViewProj" {
+        } else if name == "CameraViewProj" {
             let camera_descriptor = BindingDescriptor {
                 name: "CameraViewProj".to_string(),
                 index: 0,
@@ -196,7 +196,15 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
 
                 bind_groups.push(BindGroupDescriptor::new(0, vec![camera_descriptor]));
             }
+        }
 
+        names.push(name);
+    }
+
+    for uniform_index in 0..active_uniform_blocks {
+        let name = &names[uniform_index as usize];
+
+        if name == "CameraPosition" || name == "CameraViewProj" {
             continue;
         }
 
@@ -234,15 +242,15 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
         //     active_uniforms,
         //     active_uniform_indices
         // );
-        let (group_index, index) =
-            if let Some((group_index, index)) = program.bind_groups.get(&name) {
-                (*group_index, *index)
-            } else {
-                (next_group_index(&mut used_indices), 0)
-            };
+        let (group_index, index) = if let Some((group_index, index)) = program.bind_groups.get(name)
+        {
+            (*group_index, *index)
+        } else {
+            (next_group_index(&mut used_indices), 0)
+        };
         let property = UniformProperty::Array(Box::new(UniformProperty::UInt), size as usize / 4);
         let binding = BindingDescriptor {
-            name,
+            name: name.to_string(),
             index,
             bind_type: BindType::Uniform {
                 has_dynamic_offset: false,
