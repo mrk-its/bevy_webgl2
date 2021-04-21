@@ -199,6 +199,16 @@ pub fn reflect_layout(context: &WebGl2RenderingContext, program: &GlProgram) -> 
 
             continue;
         }
+    }
+
+    for uniform_index in 0..active_uniform_blocks {
+        let name = gl
+            .get_active_uniform_block_name(&program.program, uniform_index)
+            .unwrap();
+
+        if name == "CameraPosition" || name == "CameraViewProj" {
+            continue;
+        }
 
         let size = gl
             .get_active_uniform_block_parameter(
