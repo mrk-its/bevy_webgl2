@@ -1,7 +1,7 @@
 use bevy::prelude::*;
 
-/// This example illustrates how to create parent->child relationships between entities how parent transforms
-/// are propagated to their descendants
+/// This example illustrates how to create parent->child relationships between entities how parent
+/// transforms are propagated to their descendants
 fn main() {
     App::build()
         .insert_resource(Msaa { samples: 4 })
@@ -33,6 +33,7 @@ fn setup(
         ..Default::default()
     });
 
+    // parent cube
     commands
         .spawn_bundle(PbrBundle {
             mesh: cube_handle.clone(),
@@ -51,13 +52,13 @@ fn setup(
             });
         });
     // light
-    commands.spawn_bundle(LightBundle {
+    commands.spawn_bundle(PointLightBundle {
         transform: Transform::from_xyz(4.0, 5.0, -4.0),
         ..Default::default()
     });
     // camera
     commands.spawn_bundle(PerspectiveCameraBundle {
-        transform: Transform::from_xyz(5.0, 10.0, 10.0).looking_at(Vec3::default(), Vec3::Y),
+        transform: Transform::from_xyz(5.0, 10.0, 10.0).looking_at(Vec3::ZERO, Vec3::Y),
         ..Default::default()
     });
 }

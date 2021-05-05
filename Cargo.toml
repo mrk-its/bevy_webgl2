@@ -23,12 +23,13 @@ default = [
 [dependencies]
 winit = {version = "0.24.0", features = ["web-sys"]}
 bevy = { version="0.5.0", default-features=false }
+
 regex = "1.4"
 cfg-if = "1.0.0"
-js-sys = "0.3.45"
+js-sys = "0.3.50"
 parking_lot = "0.11.0"
-wasm-bindgen = "=0.2.69"
-web-sys = {version = "0.3.45", features = [
+wasm-bindgen = "0.2.73"
+web-sys = {version = "0.3.50", features = [
   'Document',
   'Element',
   'HtmlCanvasElement',
@@ -46,8 +47,9 @@ web-sys = {version = "0.3.45", features = [
   'WebGlSync',
 ]}
 
-# [patch.crates-io]
+[patch.crates-io]
 # bevy = {path = "../bevy", default-features=false}
+bevy = {git = "https://github.com/bevyengine/bevy", branch="main", default-features=false}
 
 [dev-dependencies]
 compile-time-run = "0.2"

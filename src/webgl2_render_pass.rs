@@ -2,7 +2,7 @@ use crate::{gl_call, renderer::*, Buffer, ScissorsState};
 use bevy::render::{
     pass::RenderPass,
     pipeline::{
-        BindGroupDescriptorId, BlendFactor, BlendOperation, CullMode, FrontFace, IndexFormat,
+        BindGroupDescriptorId, BlendFactor, BlendOperation, Face, FrontFace, IndexFormat,
         PipelineDescriptor,
     },
     renderer::{BindGroupId, BufferId, BufferUsage, RenderContext},
@@ -285,17 +285,17 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
         let gl = &ctx.device.get_context();
 
         match &pipeline.primitive.cull_mode {
-            CullMode::None => {
+            None => {
                 // TODO - can we always keep CULL_FACE enabled
                 // and use cullFace(FRONT_AND_BACK)?
                 // it seems do not work on contributors example
                 gl_call!(gl.disable(Gl::CULL_FACE));
             }
-            CullMode::Front => {
+            Some(Face::Front) => {
                 gl_call!(gl.enable(Gl::CULL_FACE));
                 gl_call!(gl.cull_face(Gl::FRONT));
             }
-            CullMode::Back => {
+            Some(Face::Back) => {
                 gl_call!(gl.enable(Gl::CULL_FACE));
                 gl_call!(gl.cull_face(Gl::BACK));
             }
@@ -326,32 +326,35 @@ impl<'a> RenderPass for WebGL2RenderPass<'a> {
                 match factor {
                     BlendFactor::Zero => Gl::ZERO,
                     BlendFactor::One => Gl::ONE,
-                    BlendFactor::SrcColor => Gl::SRC_COLOR,
-                    BlendFactor::OneMinusSrcColor => Gl::ONE_MINUS_SRC_COLOR,
+                    BlendFactor::Src => Gl::SRC_COLOR,
+                    BlendFactor::OneMinusSrc => Gl::ONE_MINUS_SRC_COLOR,
                     BlendFactor::SrcAlpha => Gl::SRC_ALPHA,
                     BlendFactor::OneMinusSrcAlpha => Gl::ONE_MINUS_SRC_ALPHA,
-                    BlendFactor::DstColor => Gl::DST_COLOR,
-                    BlendFactor::OneMinusDstColor => Gl::ONE_MINUS_DST_COLOR,
+                    BlendFactor::Dst => Gl::DST_COLOR,
+                    BlendFactor::OneMinusDst => Gl::ONE_MINUS_DST_COLOR,
                     BlendFactor::DstAlpha => Gl::DST_ALPHA,
                     BlendFactor::OneMinusDstAlpha => Gl::ONE_MINUS_DST_ALPHA,
                     BlendFactor::SrcAlphaSaturated => Gl::SRC_ALPHA_SATURATE,
-                    BlendFactor::BlendColor => Gl::BLEND_COLOR,
-                    BlendFactor::OneMinusBlendColor => panic!("not supported"),
+                    BlendFactor::Constant => Gl::CONSTANT_COLOR, // TODO: COLOR or ALPHA?
+                    BlendFactor::OneMinusConstant => Gl::ONE_MINUS_CONSTANT_COLOR, // TODO: COLOR or ALPHA?
                 }
             }
-            let src_factor = blend_factor(&state.color_blend.src_factor);
-            let dst_factor = blend_factor(&state.color_blend.dst_factor);
-            let src_alpha = blend_factor(&state.alpha_blend.src_factor);
-            let dst_alpha = blend_factor(&state.alpha_blend.dst_factor);
-            gl_call!(gl.blend_func_separate(src_factor, dst_factor, src_alpha, dst_alpha));
-            let op = match state.color_blend.operation {
-                BlendOperation::Add => Gl::FUNC_ADD,
-                BlendOperation::Subtract => Gl::FUNC_SUBTRACT,
-                BlendOperation::ReverseSubtract => Gl::FUNC_REVERSE_SUBTRACT,
-                BlendOperation::Min => Gl::MIN,
-                BlendOperation::Max => Gl::MAX,
-            };
-            gl_call!(gl.blend_equation(op));
+            if let Some(blend) = &state.blend {
+                let src_factor = blend_factor(&blend.color.src_factor);
+                let dst_factor = blend_factor(&blend.color.dst_factor);
+                let src_alpha = blend_factor(&blend.alpha.src_factor);
+                let dst_alpha = blend_factor(&blend.alpha.dst_factor);
+                gl_call!(gl.blend_func_separate(src_factor, dst_factor, src_alpha, dst_alpha));
+
+                let op = match blend.color.operation {
+                    BlendOperation::Add => Gl::FUNC_ADD,
+                    BlendOperation::Subtract => Gl::FUNC_SUBTRACT,
+                    BlendOperation::ReverseSubtract => Gl::FUNC_REVERSE_SUBTRACT,
+                    BlendOperation::Min => Gl::MIN,
+                    BlendOperation::Max => Gl::MAX,
+                };
+                gl_call!(gl.blend_equation(op));
+            }
         } else {
             gl_call!(gl.disable(Gl::BLEND));
         }
