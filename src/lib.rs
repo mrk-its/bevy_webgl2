@@ -47,7 +47,7 @@ pub enum WebGL2Stage {
 #[derive(Default)]
 pub struct WebGL2Plugin;
 
-impl Plugin for WebGL2Plugin {
+impl bevy::prelude::Plugin for WebGL2Plugin {
     fn build(&self, app: &mut App) {
         {
             let world = &mut app.world;
