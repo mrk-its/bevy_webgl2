@@ -6,7 +6,7 @@ use bevy::{
 
 /// An implementation of the classic game "Breakout"
 fn main() {
-    App::build()
+    App::new()
         .add_plugins(bevy_webgl2::DefaultPlugins)
         .insert_resource(Scoreboard { score: 0 })
         .insert_resource(ClearColor(Color::rgb(0.9, 0.9, 0.9)))
