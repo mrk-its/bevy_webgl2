@@ -12,7 +12,7 @@ use bevy::{
 
 /// This example illustrates how to add a custom attribute to a mesh and use it in a custom shader.
 fn main() {
-    App::build()
+    App::new()
         .add_plugins(bevy_webgl2::DefaultPlugins)
         .add_asset::<MyMaterialWithVertexColorSupport>()
         .add_startup_system(setup.system())

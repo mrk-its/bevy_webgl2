@@ -3,7 +3,7 @@ use bevy::{prelude::*, text::FontAtlasSet};
 // TODO: This is now broken. See #1243
 /// This example illustrates how FontAtlases are populated. Bevy uses FontAtlases under the hood to optimize text rendering.
 fn main() {
-    App::build()
+    App::new()
         .init_resource::<State>()
         .insert_resource(ClearColor(Color::BLACK))
         .add_plugins(bevy_webgl2::DefaultPlugins)

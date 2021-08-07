@@ -2,7 +2,7 @@ use bevy::prelude::*;
 
 /// This example illustrates how to create a button that changes color and text based on its interaction state.
 fn main() {
-    App::build()
+    App::new()
         .add_plugins(bevy_webgl2::DefaultPlugins)
         .init_resource::<ButtonMaterials>()
         .add_startup_system(setup.system())
