@@ -47,10 +47,6 @@ web-sys = {version = "0.3.50", features = [
   'WebGlSync',
 ]}
 
-[patch.crates-io]
-# bevy = {path = "../bevy", default-features=false}
-bevy = {git = "https://github.com/bevyengine/bevy", branch="main", default-features=false}
-
 [dev-dependencies]
 compile-time-run = "0.2"
 rand = "0.8"
