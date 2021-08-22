@@ -26,6 +26,7 @@ use bevy::render::{
     shader::{Shader, ShaderStage},
     RenderStage,
 };
+use bevy::prelude::Plugin;
 
 pub const SPRITE_PIPELINE_HANDLE: HandleUntyped =
     HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 2785347840338765446);
@@ -46,7 +47,7 @@ pub enum WebGL2Stage {
 #[derive(Default)]
 pub struct WebGL2Plugin;
 
-impl Plugin for WebGL2Plugin {
+impl bevy::prelude::Plugin for WebGL2Plugin {
     fn build(&self, app: &mut App) {
         {
             let world = &mut app.world;
