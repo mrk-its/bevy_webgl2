@@ -26,7 +26,6 @@ use bevy::render::{
     shader::{Shader, ShaderStage},
     RenderStage,
 };
-use bevy::prelude::Plugin;
 
 pub const SPRITE_PIPELINE_HANDLE: HandleUntyped =
     HandleUntyped::weak_from_u64(PipelineDescriptor::TYPE_UUID, 2785347840338765446);
